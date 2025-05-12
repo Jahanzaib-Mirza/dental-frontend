@@ -16,7 +16,7 @@ export const router = createBrowserRouter([
     path: '/',
     element: <LoginForm 
       onSubmit={(credentials) => {
-        console.log('Login attemppt:', credentials);
+        console.log('Login attempt:', credentials);
         // TODO: Implement actual login logic
       }} 
       isLoading={false} 
