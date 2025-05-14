@@ -14,7 +14,7 @@ export function DashboardLayout({ children, user }: DashboardLayoutProps) {
       <Topbar />
       <div className="flex flex-1">
         <Sidebar />
-        <main className="flex-1">
+        <main className="flex-1 p-4 min-h-screen">
           {children}
         </main>
       </div>

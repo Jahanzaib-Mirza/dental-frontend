@@ -22,8 +22,8 @@ export function DoctorCard({ name, specialty, time, date, description, avatar }:
             </div>
           </div>
           <div className="flex flex-col space-y-2">
-            <button className="bg-indigo-700 text-white px-4 py-1 rounded text-sm font-medium hover:bg-indigo-800 transition">View Appointments</button>
-            <button className="border border-indigo-700 text-indigo-700 px-4 py-1 rounded text-sm font-medium hover:bg-indigo-50 transition">View Doctor Details</button>
+            <button className="bg-[#0A0F56] text-white px-4 py-1 rounded text-sm font-medium hover:bg-[#0A0F56] transition">View Appointments</button>
+            <button className="border border-[#0A0F56] text-[#0A0F56] px-4 py-1 rounded text-sm font-medium hover:bg-indigo-50 transition">View Doctor Details</button>
           </div>
         </div>
       </div>
