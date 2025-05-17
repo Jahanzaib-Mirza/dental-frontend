@@ -5,7 +5,7 @@ import { DashboardLayout } from '../layouts/DashboardLayout';
 import AppointmentTable from '../pages/AppointmentList'; // ✅ Make sure path is correct
 import PatientList from '../pages/PatientList';
 import AddAppointment from '../pages/AddAppointment';
-import AddPatient from '../pages/AddPatient';
+import PatientProfile from '../pages/PatientProfile';
 
 const mockUser = {
   id: '1',
@@ -63,13 +63,13 @@ export const router = createBrowserRouter([
     ),
   },
   {
-  path: '/add-patient',
-  element: (
-    <DashboardLayout user={mockUser}>
-      <AddPatient/>
-    </DashboardLayout>
-  ),
-},
+    path: '/patient-profile',
+    element: (
+      <DashboardLayout user={mockUser}>
+        <PatientProfile />  
+      </DashboardLayout>
+    ),
+  }
 
 
 ]);
