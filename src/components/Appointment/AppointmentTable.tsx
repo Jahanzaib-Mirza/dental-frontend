@@ -45,7 +45,11 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
         </thead>
         <tbody>
           {appointments.map((appointment, index) => (
-            <tr key={index} className="border-t border-gray-200 text-gray-700 hover:bg-gray-50">
+            <tr 
+              key={index} 
+              className="border-t border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
+              onClick={() => navigate('/appointment-details', { state: { appointment } })}
+            >
               <td className="flex items-center space-x-2 p-2">
                 <img
                   src={appointment.image}
@@ -75,8 +79,24 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
               </td>
               <td className="p-2">{appointment.doctor}</td>
               <td className="p-2 flex space-x-2">
-                <button className="text-gray-400 hover:text-blue-500 text-xxs">✏️</button>
-                <button className="text-gray-400 hover:text-red-500 text-xxs">🗑️</button>
+                <button 
+                  className="text-gray-400 hover:text-blue-500 text-xxs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle edit
+                  }}
+                >
+                  ✏️
+                </button>
+                <button 
+                  className="text-gray-400 hover:text-red-500 text-xxs"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle delete
+                  }}
+                >
+                  🗑️
+                </button>
               </td>
             </tr>
           ))}

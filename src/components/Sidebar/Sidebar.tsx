@@ -1,13 +1,16 @@
 import { icons } from "../../assets";
 import Icon from "../Icons";
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from "../../App";
 
 
 const navLinks = [
-  { label: 'Dashboard', icon: 'bar_chart', path: '/' },
+  { label: 'Dashboard', icon: 'bar_chart', path: '/dashboard' },
   { label: 'Doctors', icon: 'calender_add', path: '/doctors' },
   { label: 'Appointments', icon: 'vase', path: '/appointments' },
   { label: 'Patients', icon: 'users', path: '/patients' },
+  { label: 'Services', icon: 'document_chart', path: '/services' },
   // { label: 'Add Appointment', icon: 'users', path: '/add-appointment' },
   // { label: 'Add Patient', icon: 'users', path: '/add-patient' },
 
@@ -17,7 +20,7 @@ const navLinks = [
   { label: 'Account', icon: 'user', path: '/account' },
   { divider: true },
   { label: 'Settings', icon: 'settings', path: '/settings' },
-  { label: 'Log Out', icon: 'logout', path: '/logout' },
+  { label: 'Log Out', icon: 'logout', path: '/logout', isLogout: true },
 ];
 
 
@@ -60,13 +63,26 @@ interface MenuItemProps {
 // }
 
 export function Sidebar() {
-  const navigate = useNavigate(); // ⬅️ Initialize
+  const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
+
+  const handleNavigation = (path: string, isLogout?: boolean) => {
+    if (isLogout) {
+      logout();
+      navigate('/login');
+    } else {
+      navigate(path);
+    }
+  };
 
   return (
-    <aside className="w-74 min-h-screen h-screen flex border-r border-gray-200 justify-center">
+    <aside className="w-74 min-h-screen h-screen flex justify-center ">
       <div className="bg-white w-64 h-screen rounded-lg mt-5 drop-shadow-md p-4">
         <div className="flex items-center justify-center w-full pb-6">
-          <span className="text-2xl font-bold text-primary flex items-center gap-2">
+          <span 
+            className="text-2xl font-bold text-primary flex items-center gap-2 cursor-pointer"
+            onClick={() => navigate('/dashboard')}
+          >
             Medic
           </span>
         </div>
@@ -83,7 +99,7 @@ export function Sidebar() {
                   key={link.label}
                   icon={link.icon as keyof typeof icons}
                   text={link.label}
-                  onClick={() => navigate(link.path)}
+                  onClick={() => handleNavigation(link.path, link.isLogout)}
                 />
               );
             } else {

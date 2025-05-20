@@ -1,0 +1,143 @@
+import { useState } from 'react';
+
+interface AddServiceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (serviceData: ServiceFormData) => void;
+}
+
+export interface ServiceFormData {
+  name: string;
+  price: string;
+  description: string;
+  features: string[];
+}
+
+export function AddServiceModal({ isOpen, onClose, onSubmit }: AddServiceModalProps) {
+  const [formData, setFormData] = useState<ServiceFormData>({
+    name: '',
+    price: '',
+    description: '',
+    features: [''],
+  });
+
+  const handleFeatureChange = (idx: number, value: string) => {
+    const updated = [...formData.features];
+    updated[idx] = value;
+    setFormData({ ...formData, features: updated });
+  };
+
+  const addFeature = () => setFormData({ ...formData, features: [...formData.features, ''] });
+  const removeFeature = (idx: number) => setFormData({ ...formData, features: formData.features.filter((_, i) => i !== idx) });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(formData);
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-white rounded-xl p-6 w-[600px] max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold">Add Service</h2>
+          <button 
+            onClick={onClose} 
+            className="text-gray-500 hover:text-gray-700"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Service Name */}
+          <div>
+            <label className="block text-sm mb-2">Service Name</label>
+            <input
+              type="text"
+              required
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm"
+              placeholder="e.g., General Dentistry, Orthodontics"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            />
+          </div>
+
+          {/* Price */}
+          <div>
+            <label className="block text-sm mb-2">Price</label>
+            <input
+              type="text"
+              required
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm"
+              placeholder="e.g., From $75, $100-$300"
+              value={formData.price}
+              onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+            />
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm mb-2">Description</label>
+            <textarea
+              required
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm h-24 resize-none"
+              placeholder="Briefly describe the service and its benefits"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+
+          {/* Features */}
+          <div>
+            <label className="block text-sm mb-2">Features</label>
+            <div className="bg-[#F8F7FF] p-4 rounded-lg space-y-3">
+              {formData.features.map((feature, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    required
+                    placeholder={`Feature ${idx + 1} (e.g., Check-ups, Cleaning)`}
+                    className="flex-1 bg-white border border-gray-200 rounded-lg p-3 text-sm"
+                    value={feature}
+                    onChange={e => handleFeatureChange(idx, e.target.value)}
+                  />
+                  {formData.features.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(idx)}
+                      className="text-red-500 hover:text-red-700 p-1"
+                      aria-label="Remove feature"
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addFeature}
+                className="text-[#0A0F56] text-sm hover:underline flex items-center"
+              >
+                <span className="mr-1">+</span> Add Feature
+              </button>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-end">
+            <button
+              type="submit"
+              className="bg-[#0A0F56] text-white px-6 py-3 rounded-lg text-sm hover:bg-[#090D45] transition-colors flex items-center"
+            >
+              Add Service
+              <span className="ml-2">→</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+} 

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { FaSearch } from 'react-icons/fa';
 
 interface AddPatientModalProps {
   isOpen: boolean;
@@ -13,290 +12,159 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
   onSubmit
 }) => {
   const [formData, setFormData] = useState({
-    patientName: '',
-    patientSource: '',
-    visitType: 'first-time',
-    isInternational: false,
-    doctor: '',
-    visitType2: '',
-    slotNumber: '',
-    appointmentDate: '25/05/2022',
-    appointmentTime: '03:00 PM',
-    isWalkin: false,
-    needsAttention: false,
-    notes: '',
-    enableRepeat: false
+    name: '',
+    email: '',
+    mobile: '',
+    cnic: '',
+    gender: '',
+    address: '',
+    allergies: ''
   });
 
-  const [image, setImage] = useState<string | null>(null);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: value
     }));
-  };
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImage(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ ...formData, image });
+    onSubmit(formData);
     onClose();
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl p-6 w-[600px] max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-md">
+      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg border border-gray-100 relative animate-fadeIn">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Add Patient</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Add Patient</h2>
           <button 
             onClick={onClose} 
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+            aria-label="Close modal"
           >
-            ✕
+            ×
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Patient Image Upload */}
-          <div className="flex justify-center">
-            <label htmlFor="patientImage" className="cursor-pointer">
-              {image ? (
-                <img 
-                  src={image} 
-                  alt="Patient" 
-                  className="w-24 h-24 rounded-full object-cover border-2 border-[#0A0F56]"
-                />
-              ) : (
-                <div className="w-24 h-24 rounded-full bg-[#F8F7FF] border-2 border-dashed border-[#0A0F56] flex items-center justify-center">
-                  <span className="text-[#0A0F56] text-sm">Add Photo</span>
-                </div>
-              )}
-              <input
-                id="patientImage"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-
-          {/* Patient Name */}
+          {/* Name */}
           <div>
-            <label className="block text-sm mb-2">Patient name</label>
-            <div className="relative">
-              <input
-                type="text"
-                name="patientName"
-                value={formData.patientName}
-                onChange={handleChange}
-                className="w-full border border-gray-200 rounded-lg p-3 pr-12 text-sm"
-                placeholder="Enter patient name & number"
-              />
-              <button 
-                type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#0A0F56] text-white p-2 rounded-lg"
-              >
-                <FaSearch size={14} />
-              </button>
-            </div>
-          </div>
-
-          {/* About the patient */}
-          <div>
-            <label className="block text-sm mb-2">About the patient</label>
-            <div className="bg-[#F8F7FF] p-4 rounded-lg space-y-3">
-              <select
-                name="patientSource"
-                value={formData.patientSource}
-                onChange={handleChange}
-                className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm"
-              >
-                <option value="">Select patient source</option>
-                <option value="referral">Referral</option>
-                <option value="walk-in">Walk-in</option>
-                <option value="online">Online</option>
-              </select>
-
-              <div className="flex space-x-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="visitType"
-                    value="first-time"
-                    checked={formData.visitType === 'first-time'}
-                    onChange={handleChange}
-                    className="text-[#0A0F56]"
-                  />
-                  <span className="text-sm">First-Time Visit</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="radio"
-                    name="visitType"
-                    value="re-visit"
-                    checked={formData.visitType === 're-visit'}
-                    onChange={handleChange}
-                    className="text-[#0A0F56]"
-                  />
-                  <span className="text-sm">Re-Visit</span>
-                </label>
-              </div>
-            </div>
-
-            <label className="flex items-center space-x-2 mt-2">
-              <input
-                type="checkbox"
-                name="isInternational"
-                checked={formData.isInternational}
-                onChange={handleChange}
-                className="text-[#0A0F56] rounded"
-              />
-              <span className="text-sm">International Patient</span>
-            </label>
-          </div>
-
-          {/* Doctor */}
-          <div>
-            <label className="block text-sm mb-2">Doctor</label>
-            <div className="grid grid-cols-3 gap-3">
-              <select
-                name="doctor"
-                value={formData.doctor}
-                onChange={handleChange}
-                className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
-              >
-                <option value="">Select doctor</option>
-                <option value="dr-smith">Dr. Smith</option>
-                <option value="dr-johnson">Dr. Johnson</option>
-              </select>
-              <select
-                name="visitType2"
-                value={formData.visitType2}
-                onChange={handleChange}
-                className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
-              >
-                <option value="">Select visit type</option>
-                <option value="consultation">Consultation</option>
-                <option value="follow-up">Follow-up</option>
-              </select>
-              <input
-                type="text"
-                name="slotNumber"
-                value={formData.slotNumber}
-                onChange={handleChange}
-                placeholder="Enter slots number"
-                className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
-              />
-            </div>
-          </div>
-
-          {/* Time */}
-          <div>
-            <label className="block text-sm mb-2">Time</label>
-            <div className="bg-[#F8F7FF] p-4 rounded-lg space-y-3">
-              <div className="flex space-x-3">
-                <input
-                  type="text"
-                  value={formData.appointmentDate}
-                  readOnly
-                  className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
-                />
-                <input
-                  type="text"
-                  value={formData.appointmentTime}
-                  readOnly
-                  className="bg-white border border-gray-200 rounded-lg p-3 text-sm"
-                />
-                <button
-                  type="button"
-                  className="text-[#0A0F56] text-sm hover:underline"
-                >
-                  Change Time
-                </button>
-              </div>
-
-              <div className="flex space-x-4">
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    name="isWalkin"
-                    checked={formData.isWalkin}
-                    onChange={handleChange}
-                    className="text-[#0A0F56] rounded"
-                  />
-                  <span className="text-sm">Mark Apt as Arrived</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    name="isWalkin"
-                    checked={formData.isWalkin}
-                    onChange={handleChange}
-                    className="text-[#0A0F56] rounded"
-                  />
-                  <span className="text-sm">Is Walkin</span>
-                </label>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    name="needsAttention"
-                    checked={formData.needsAttention}
-                    onChange={handleChange}
-                    className="text-[#0A0F56] rounded"
-                  />
-                  <span className="text-sm">Needs Attention</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* Review Notes */}
-          <div>
-            <label className="block text-sm mb-2">Review Notes</label>
-            <textarea
-              name="notes"
-              value={formData.notes}
-              onChange={handleChange}
-              placeholder="Enter patient details..."
-              className="w-full border border-gray-200 rounded-lg p-3 text-sm h-24 resize-none"
-            />
-          </div>
-
-          {/* Enable repeats */}
-          <label className="flex items-center space-x-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Name</label>
             <input
-              type="checkbox"
-              name="enableRepeat"
-              checked={formData.enableRepeat}
+              type="text"
+              name="name"
+              value={formData.name}
               onChange={handleChange}
-              className="text-[#0A0F56] rounded"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+              placeholder="Enter patient name"
+              required
             />
-            <span className="text-sm">Enable repeats patient</span>
-          </label>
+          </div>
+
+          {/* Gender & Mobile Number in one row */}
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
+              <select
+                name="gender"
+                value={formData.gender}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+                required
+              >
+                <option value="">Select gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
+              <input
+                type="tel"
+                name="mobile"
+                value={formData.mobile}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+                placeholder="Enter mobile number"
+                required
+              />
+            </div>
+          </div>
+
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+              placeholder="Enter email address"
+              required
+            />
+          </div>
+
+          {/* CNIC (optional) */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">CNIC <span className="text-gray-400 font-normal">(optional)</span></label>
+            <input
+              type="text"
+              name="cnic"
+              value={formData.cnic}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+              placeholder="Enter CNIC (optional)"
+            />
+          </div>
+
+          {/* Address */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Address</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+              placeholder="Enter address"
+              required
+            />
+          </div>
+
+          {/* Allergies */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Allergies</label>
+            <input
+              type="text"
+              name="allergies"
+              value={formData.allergies}
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
+              placeholder="Enter allergies (if any)"
+            />
+          </div>
 
           {/* Submit Button */}
-          <div className="flex justify-end">
+          <div className="flex justify-end space-x-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-100 transition"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
-              className="bg-[#0A0F56] text-white px-6 py-3 rounded-lg text-sm hover:bg-[#090D45] transition-colors flex items-center"
+              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition"
             >
-              Add Appointment
-              <span className="ml-2">→</span>
+              Add Patient
             </button>
           </div>
         </form>
