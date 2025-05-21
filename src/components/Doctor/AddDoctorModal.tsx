@@ -4,6 +4,7 @@ interface AddDoctorModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (doctorData: DoctorFormData) => void;
+  isSubmitting?: boolean;
 }
 
 export interface DoctorFormData {
@@ -14,9 +15,10 @@ export interface DoctorFormData {
   experience: number;
   specialization: string;
   license: string;
+  phone: string;
 }
 
-export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProps) {
+export function AddDoctorModal({ isOpen, onClose, onSubmit, isSubmitting }: AddDoctorModalProps) {
   const [formData, setFormData] = useState<DoctorFormData>({
     email: '',
     name: '',
@@ -25,12 +27,12 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
     experience: 0,
     specialization: '',
     license: '',
+    phone: '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
-    onClose();
   };
 
   if (!isOpen) return null;
@@ -44,6 +46,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
             onClick={onClose}
             className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
             aria-label="Close modal"
+            disabled={isSubmitting}
           >
             ×
           </button>
@@ -57,6 +60,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -67,6 +71,18 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
+            <input
+              type="tel"
+              required
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              disabled={isSubmitting}
             />
           </div>
           <div>
@@ -76,6 +92,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               value={formData.gender}
               onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+              disabled={isSubmitting}
             >
               <option value="">Select Gender</option>
               <option value="male">Male</option>
@@ -93,6 +110,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
                 value={formData.age}
                 onChange={(e) => setFormData({ ...formData, age: parseInt(e.target.value) })}
+                disabled={isSubmitting}
               />
             </div>
             <div className="flex-1">
@@ -104,6 +122,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
                 value={formData.experience}
                 onChange={(e) => setFormData({ ...formData, experience: parseInt(e.target.value) })}
+                disabled={isSubmitting}
               />
             </div>
           </div>
@@ -114,6 +133,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               value={formData.specialization}
               onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+              disabled={isSubmitting}
             >
               <option value="">Select Specialization</option>
               <option value="General Dentist">General Dentist</option>
@@ -133,6 +153,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               value={formData.license}
               onChange={(e) => setFormData({ ...formData, license: e.target.value })}
+              disabled={isSubmitting}
             />
           </div>
           <div className="flex justify-end space-x-3 pt-2">
@@ -140,14 +161,16 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit }: AddDoctorModalProp
               type="button"
               onClick={onClose}
               className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-100 transition"
+              disabled={isSubmitting}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition"
+              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isSubmitting}
             >
-              Add Doctor
+              {isSubmitting ? 'Adding...' : 'Add Doctor'}
             </button>
           </div>
         </form>

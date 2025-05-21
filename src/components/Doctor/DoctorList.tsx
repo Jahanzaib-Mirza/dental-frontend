@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../lib/hooks';
 import { fetchDoctors } from '../../lib/store/slices/doctorsSlice';
 import { DoctorCard } from './DoctorCard';
+import type { RootState } from '../../lib/store/store';
+import type { User } from '../../lib/api/services/users';
 
 export function DoctorList() {
   const dispatch = useAppDispatch();
-  const { doctors, isLoading, error } = useAppSelector((state) => state.doctors);
+  const { doctors, isLoading, error } = useAppSelector((state: RootState) => state.doctors);
 
   useEffect(() => {
     dispatch(fetchDoctors());
@@ -37,7 +39,7 @@ export function DoctorList() {
 
   return (
     <div>
-      {doctors.map((doctor) => (
+      {doctors.map((doctor: User) => (
         <DoctorCard
           key={doctor.id}
           name={doctor.name}
