@@ -35,7 +35,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
           className="text-3xl font-bold text-[#0A0F56] cursor-pointer" 
           onClick={() => navigate('/login')}
         >
-          MI dental
+      
         </div>
       </div>
       
@@ -51,7 +51,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
           </div>
           <div className="relative z-10 h-full flex flex-col justify-between">
             <div className="text-white">
-              <h2 className="text-4xl font-bold">Welcome Back</h2>
+              <h2 className="text-4xl font-bold">MI Dental</h2>
               <p className="mt-4 text-blue-200">Sign in to access your dental clinic dashboard and manage patient appointments.</p>
             </div>
             
