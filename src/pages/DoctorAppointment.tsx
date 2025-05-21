@@ -4,14 +4,26 @@ import { DoctorPagination } from '../components/Doctor/DoctorPagination';
 import { AddDoctorModal } from '../components/Doctor/AddDoctorModal';
 import type { DoctorFormData } from '../components/Doctor/AddDoctorModal';
 import { FaPlus } from 'react-icons/fa';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { createDoctor } from '../lib/store/slices/doctorsSlice';
+import { toast } from 'react-hot-toast';
+import type { RootState } from '../lib/store/store';
 
 export default function DoctorAppointment() {
+  const dispatch = useAppDispatch();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  const { isCreating } = useAppSelector((state: RootState) => state.doctors);
 
-  const handleAddDoctor = (doctorData: DoctorFormData) => {
-    // TODO: Implement the API call to add the doctor
-    console.log('New doctor data:', doctorData);
-    // After successful API call, you might want to refresh the doctor list
+  const handleAddDoctor = async (doctorData: DoctorFormData) => {
+    try {
+      await dispatch(createDoctor(doctorData)).unwrap();
+      toast.success('Doctor added successfully');
+      setIsModalOpen(false);
+    } catch (error: any) {
+      // The API returns { status: 'error', error: { code: string, message: string } }
+      toast.error(error);
+    }
   };
 
   return (
@@ -24,6 +36,7 @@ export default function DoctorAppointment() {
           <button
             onClick={() => setIsModalOpen(true)}
             className="ml-1"
+            disabled={isCreating}
           >
             Add Doctor
           </button>
@@ -39,6 +52,7 @@ export default function DoctorAppointment() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleAddDoctor}
+        isSubmitting={isCreating}
       />
     </div>
   );
