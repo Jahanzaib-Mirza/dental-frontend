@@ -1,24 +1,27 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-
-interface Patient {
-  name: string;
-  username: string;
-  id: string;
-  date: string;
-  sex: string;
-  age: number;
-  disease: string;
-  doctor: string;
-  image: string;
-}
+import type { Patient } from '../../lib/api/services/patients';
 
 interface PatientTableProps {
   patients: Patient[];
+  onEdit: (patient: Patient) => void;
 }
 
-export const PatientTable: React.FC<PatientTableProps> = ({ patients }) => {
+export const PatientTable: React.FC<PatientTableProps> = ({ patients, onEdit }) => {
   const navigate = useNavigate();
+
+  const calculateAge = (dob: string) => {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    
+    return age;
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
@@ -33,45 +36,41 @@ export const PatientTable: React.FC<PatientTableProps> = ({ patients }) => {
         <thead>
           <tr className="bg-gray-100 text-gray-600">
             <th className="text-left p-2">Patient</th>
-            <th className="text-left p-2">Patient ID</th>
-            <th className="text-left p-2">Date</th>
-            <th className="text-left p-2">Sex</th>
+            <th className="text-left p-2">Email</th>
+            <th className="text-left p-2">Phone</th>
+            <th className="text-left p-2">Gender</th>
             <th className="text-left p-2">Age</th>
-            <th className="text-left p-2">Disease</th>
-            <th className="text-left p-2">Doctor</th>
+            <th className="text-left p-2">Address</th>
             <th className="text-left p-2">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {patients.map((patient, index) => (
+          {patients.map((patient) => (
             <tr
-              key={index}
+              key={patient.id}
               className="border-t border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
               onClick={() => navigate('/patient-profile', { state: { patient } })}
             >
               <td className="flex items-center space-x-2 p-2">
-                <img
-                  src={patient.image}
-                  alt="profile"
-                  className="w-6 h-6 rounded-full"
-                />
+                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
+                  {patient.name.charAt(0)}
+                </div>
                 <div>
                   <p>{patient.name}</p>
-                  <p className="text-gray-500 text-xxs">{patient.username}</p>
+                  <p className="text-gray-500 text-xxs">{patient.email}</p>
                 </div>
               </td>
-              <td className="p-2">{patient.id}</td>
-              <td className="p-2">{patient.date}</td>
-              <td className="p-2">{patient.sex}</td>
-              <td className="p-2">{patient.age}</td>
-              <td className="p-2">{patient.disease}</td>
-              <td className="p-2">{patient.doctor}</td>
+              <td className="p-2">{patient.email}</td>
+              <td className="p-2">{patient.phone}</td>
+              <td className="p-2">{patient.gender}</td>
+              <td className="p-2">{calculateAge(patient.dob)}</td>
+              <td className="p-2">{patient.address}</td>
               <td className="p-2 flex space-x-2">
                 <button 
                   className="text-gray-400 hover:text-blue-500 text-xxs"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // Handle edit
+                    onEdit(patient);
                   }}
                 >
                   ✏️
