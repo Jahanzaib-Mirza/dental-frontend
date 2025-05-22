@@ -8,7 +8,7 @@ function App() {
   return (
     <Provider store={store}>
       <RouterProvider router={router} />
-      <Toaster position="top-right" />
+      <Toaster position="bottom-right" />
     </Provider>
   );
 }
