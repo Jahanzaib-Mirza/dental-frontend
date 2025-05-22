@@ -10,6 +10,7 @@ import PatientProfile from '../pages/PatientProfile';
 import Services from '../pages/Services';
 import { AuthContext } from '../App';
 import AppointmentDetails from '../pages/AppointmentDetails';
+import Expense from '../pages/Expense';
 
 // Define UserRole type to fix type errors
 type UserRole = 'admin' | 'doctor' | 'receptionist';
@@ -280,6 +281,14 @@ export const router = createBrowserRouter([
     element: (
       <DashboardLayout user={mockUser}>
         <AppointmentDetails />
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: '/expense',
+    element: (
+      <DashboardLayout user={mockUser}>
+        <Expense />
       </DashboardLayout>
     ),
   }
