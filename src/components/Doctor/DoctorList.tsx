@@ -1,17 +1,28 @@
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../lib/hooks';
-import { fetchDoctors } from '../../lib/store/slices/doctorsSlice';
+import { fetchDoctors, updateDoctor } from '../../lib/store/slices/doctorsSlice';
 import { DoctorCard } from './DoctorCard';
 import type { RootState } from '../../lib/store/store';
 import type { User } from '../../lib/api/services/users';
+import { toast } from 'react-hot-toast';
 
 export function DoctorList() {
   const dispatch = useAppDispatch();
-  const { doctors, isLoading, error } = useAppSelector((state: RootState) => state.doctors);
+  const { doctors, isLoading, error, isUpdating } = useAppSelector((state: RootState) => state.doctors);
 
   useEffect(() => {
     dispatch(fetchDoctors());
   }, [dispatch]);
+
+  const handleEditDoctor = async (id: string, doctorData: any, onSuccess: () => void) => {
+    try {
+      await dispatch(updateDoctor({ id, doctorData })).unwrap();
+      toast.success('Doctor updated successfully');
+      onSuccess();
+    } catch (error: any) {
+      toast.error(error);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -42,15 +53,9 @@ export function DoctorList() {
       {doctors.map((doctor: User) => (
         <DoctorCard
           key={doctor.id}
-          name={doctor.name}
-          specialty={doctor.specialization || 'General Dentist'}
-          time={doctor.availability?.length ? 'Available' : 'Not available'}
-          date={'Contact for details'}
-          description={doctor.education || 'Professional dental care provider'}
-          avatar={doctor.profileImage || `https://randomuser.me/api/portraits/${doctor.gender === 'male' ? 'men' : 'women'}/1.jpg`}
-          experience={doctor.experience || 0}
-          gender={doctor.gender || 'Not specified'}
-          age={doctor.age || 0}
+          doctor={doctor}
+          onEdit={handleEditDoctor}
+          isUpdating={isUpdating}
         />
       ))}
     </div>

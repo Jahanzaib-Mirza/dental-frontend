@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { userService } from '../../api/services/users';
 import type { User } from '../../api/services/users';
+import type { DoctorFormData } from '../../../components/Doctor/AddDoctorModal';
 
 interface DoctorsState {
   doctors: User[];
@@ -8,6 +9,8 @@ interface DoctorsState {
   error: string | null;
   isCreating: boolean;
   createError: string | null;
+  isUpdating: boolean;
+  updateError: string | null;
 }
 
 const initialState: DoctorsState = {
@@ -16,6 +19,8 @@ const initialState: DoctorsState = {
   error: null,
   isCreating: false,
   createError: null,
+  isUpdating: false,
+  updateError: null,
 };
 
 export const fetchDoctors = createAsyncThunk(
@@ -42,6 +47,21 @@ export const createDoctor = createAsyncThunk(
     } catch (error: any) {
       console.log(error.response.data.error.message);
       return rejectWithValue(error.response?.data?.error?.message);
+    }
+  }
+);
+
+export const updateDoctor = createAsyncThunk(
+  'doctors/updateDoctor',
+  async ({ id, doctorData }: { id: string; doctorData: Partial<DoctorFormData> }, { rejectWithValue }) => {
+    try {
+      const response = await userService.updateUser(id, {
+        ...doctorData,
+        role: 'doctor',
+      });
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || 'Failed to update doctor');
     }
   }
 );
@@ -75,6 +95,21 @@ const doctorsSlice = createSlice({
       .addCase(createDoctor.rejected, (state, action) => {
         state.isCreating = false;
         state.createError = action.payload as string;
+      })
+      .addCase(updateDoctor.pending, (state) => {
+        state.isUpdating = true;
+        state.updateError = null;
+      })
+      .addCase(updateDoctor.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        const index = state.doctors.findIndex(doctor => doctor.id === action.payload.id);
+        if (index !== -1) {
+          state.doctors[index] = action.payload;
+        }
+      })
+      .addCase(updateDoctor.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.updateError = action.payload as string;
       });
   },
 });
