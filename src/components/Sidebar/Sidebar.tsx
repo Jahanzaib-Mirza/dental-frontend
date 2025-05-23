@@ -2,7 +2,7 @@ import { icons } from "../../assets";
 import Icon from "../Icons";
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '../../lib/hooks';
-import { logout } from '../../lib/store/slices/authSlice';
+import { logoutUser } from '../../lib/store/slices/authSlice';
 
 const navLinks = [
   { label: 'Dashboard', icon: 'bar_chart', path: '/dashboard' },
@@ -65,9 +65,9 @@ export function Sidebar() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const handleNavigation = (path: string, isLogout?: boolean) => {
+  const handleNavigation = async (path: string, isLogout?: boolean) => {
     if (isLogout) {
-      dispatch(logout());
+      await dispatch(logoutUser());
       navigate('/login');
     } else {
       navigate(path);
