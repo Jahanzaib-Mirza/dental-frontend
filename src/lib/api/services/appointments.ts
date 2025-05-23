@@ -49,8 +49,14 @@ export const appointmentService = {
         return response.data;
     },
 
-    getAvailableSlots: async () => {
-        const response = await api.get(API_ENDPOINTS.APPOINTMENTS.AVAILABLE_SLOTS);
+    getAvailableSlots: async (date: string, doctorId: string) => {
+        const response = await api.get(API_ENDPOINTS.APPOINTMENTS.AVAILABLE_SLOTS, {
+            params: {
+                date,
+                doctorId
+            }
+        });
+        console.log(response.data);
         return response.data;
     },
 
