@@ -17,8 +17,8 @@ export function Topbar() {
         className="w-8 h-8 rounded-full"
       />
       <div className="text-sm">
-        <p className="font-medium">Northern Central Clinic</p>
-        <p className="text-gray-300">Idaho, United States</p>
+        <p className="font-medium">{user.organization.name}</p>
+        <p className="text-gray-300">{user.organization.address}</p>
       </div>
       <button className="text-gray-300 ml-2">▼</button>
     </div>

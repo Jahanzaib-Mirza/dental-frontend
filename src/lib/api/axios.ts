@@ -30,7 +30,7 @@ api.interceptors.response.use(
       switch (error.response.status) {
         case 401:
           // Handle unauthorized (token expired/invalid)
-          window.location.href = '/login';
+          console.error('Unauthorized access - 401. App should redirect via routing.');
           break;
         case 403:
           // Handle forbidden

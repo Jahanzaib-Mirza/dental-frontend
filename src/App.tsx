@@ -13,7 +13,7 @@ function AppContent() {
 
   useEffect(() => {
     dispatch(getProfile());
-  }, [dispatch]);
+  }, []);
 
   return (
     <>
