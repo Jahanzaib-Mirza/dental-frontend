@@ -1,31 +1,77 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { AddPatientModal } from '../components/Patient/AddPatientModal';
 import { FiUser, FiCalendar, FiClock, FiFileText, FiPlus } from 'react-icons/fi';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { createAppointment } from '../lib/store/slices/appointmentsSlice';
+import { fetchPatients } from '../lib/store/slices/patientsSlice';
+import { fetchDoctors } from '../lib/store/slices/doctorsSlice';
+import { toast } from 'react-hot-toast';
+import type { RootState } from '../lib/store/store';
+import type { CreateAppointmentData } from '../lib/api/services/appointments';
+import type { Patient } from '../lib/api/services/patients';
+import type { User } from '../lib/api/services/users';
+import { appointmentService } from '../lib/api/services/appointments';
+
+interface Doctor {
+  id: string;
+  name: string;
+}
 
 const AddAppointment = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
+
+  const { isCreating, createError } = useAppSelector((state: RootState) => state.appointments);
+  const { patients, isLoading: isLoadingPatients } = useAppSelector((state: RootState) => state.patients);
+  const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
 
   const [formData, setFormData] = useState({
-    patientName: '',
-    patientSource: '',
-    visitType: 'first-time',
-    isInternational: false,
-    doctor: '',
-    visitType2: '',
-    slotNumber: '',
+    patientId: '',
+    doctorId: '',
     appointmentDate: '',
     appointmentTime: '',
-    isWalkin: false,
-    needsAttention: false,
+    reason: '',
     notes: '',
-    enableRepeat: false
   });
 
-  const patients = ['John Doe', 'Alice Smith', 'Michael Brown'];
-  const doctors = ['Dr. Smith', 'Dr. Johnson'];
+  useEffect(() => {
+    dispatch(fetchPatients())
+      .unwrap()
+      .catch((error) => {
+        toast.error(error || 'Failed to fetch patients');
+      });
+
+    dispatch(fetchDoctors())
+      .unwrap()
+      .catch((error) => {
+        toast.error(error || 'Failed to fetch doctors');
+      });
+  }, [dispatch]);
+
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (formData.appointmentDate && formData.doctorId) {
+        setIsLoadingSlots(true);
+        try {
+          const response = await appointmentService.getAvailableSlots(formData.appointmentDate, formData.doctorId);
+          setAvailableSlots(response.availableSlots);
+        } catch (error: any) {
+          toast.error(error.response?.data?.message || 'Failed to fetch available slots');
+        } finally {
+          setIsLoadingSlots(false);
+        }
+      } else {
+        setAvailableSlots([]);
+      }
+    };
+
+    fetchSlots();
+  }, [formData.appointmentDate, formData.doctorId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -35,10 +81,26 @@ const AddAppointment = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Submitted:', { ...formData });
-    // Submit logic here
+
+    try {
+      const appointmentData: CreateAppointmentData = {
+        date: formData.appointmentDate,
+        time: formData.appointmentTime,
+        reason: formData.reason,
+        appointmentTimestamp: new Date(`${formData.appointmentDate}T${formData.appointmentTime}`).getTime(),
+        notes: formData.notes,
+        patientId: formData.patientId,
+        doctorId: formData.doctorId,
+      };
+
+      await dispatch(createAppointment(appointmentData)).unwrap();
+      toast.success('Appointment created successfully');
+      navigate('/appointments');
+    } catch (error: any) {
+      toast.error(error || 'Failed to create appointment');
+    }
   };
 
   const handleAddPatient = (patientData: any) => {
@@ -57,6 +119,12 @@ const AddAppointment = () => {
               <p className="text-center text-blue-100 mt-1">Fill in the details below to create a new appointment</p>
             </div>
 
+            {createError && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative m-4" role="alert">
+                <span className="block sm:inline">{createError}</span>
+              </div>
+            )}
+
             <div className="p-8 py-4">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-6">
                 {/* Left Column */}
@@ -71,9 +139,15 @@ const AddAppointment = () => {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Patient Name</label>
                         <Select
-                          options={patients.map((p) => ({ value: p, label: p }))}
-                          value={formData.patientName ? { value: formData.patientName, label: formData.patientName } : null}
-                          onChange={(selected) => setFormData((prev) => ({ ...prev, patientName: selected ? selected.value : '' }))}
+                          options={patients.map((p: Patient) => ({ value: p.id, label: p.name }))}
+                          value={patients.find((p: Patient) => p.id === formData.patientId) ? 
+                            { value: formData.patientId, label: patients.find((p: Patient) => p.id === formData.patientId)?.name } : 
+                            null
+                          }
+                          onChange={(selected) => setFormData((prev) => ({ 
+                            ...prev, 
+                            patientId: selected ? selected.value : ''
+                          }))}
                           isClearable
                           isSearchable
                           placeholder="Select or search patient name"
@@ -117,9 +191,15 @@ const AddAppointment = () => {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Select Doctor</label>
                       <Select
-                        options={doctors.map((d) => ({ value: d, label: d }))}
-                        value={formData.doctor ? { value: formData.doctor, label: formData.doctor } : null}
-                        onChange={(selected) => setFormData((prev) => ({ ...prev, doctor: selected ? selected.value : '' }))}
+                        options={doctors.map((d: User) => ({ value: d.id, label: d.name }))}
+                        value={doctors.find((d: User) => d.id === formData.doctorId) ? 
+                          { value: formData.doctorId, label: doctors.find((d: User) => d.id === formData.doctorId)?.name } : 
+                          null
+                        }
+                        onChange={(selected) => setFormData((prev) => ({ 
+                          ...prev, 
+                          doctorId: selected ? selected.value : ''
+                        }))}
                         isClearable
                         isSearchable
                         placeholder="Select or search doctor"
@@ -169,13 +249,25 @@ const AddAppointment = () => {
                               />
                             </div>
                             <div className="relative">
-                              <input
-                                type="time"
+                              <select
                                 name="appointmentTime"
                                 value={formData.appointmentTime}
                                 onChange={handleChange}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
-                              />
+                                disabled={isLoadingSlots}
+                              >
+                                <option value="">Select Time</option>
+                                {availableSlots.map((slot: string) => (
+                                  <option key={slot} value={slot}>
+                                    {slot}
+                                  </option>
+                                ))}
+                              </select>
+                              {isLoadingSlots && (
+                                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[#0A0F56]"></div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -191,12 +283,22 @@ const AddAppointment = () => {
                     </div>
                     <div className="space-y-2">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Review Notes</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Visit</label>
+                        <textarea
+                          name="reason"
+                          value={formData.reason}
+                          onChange={handleChange}
+                          placeholder="Enter reason for visit..."
+                          className="w-full border border-gray-200 rounded-lg p-2 text-sm h-16 resize-none focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all bg-white"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                         <textarea
                           name="notes"
                           value={formData.notes}
                           onChange={handleChange}
-                          placeholder="Enter appointment details..."
+                          placeholder="Enter additional notes..."
                           className="w-full border border-gray-200 rounded-lg p-2 text-sm h-16 resize-none focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all bg-white"
                         />
                       </div>
@@ -209,10 +311,13 @@ const AddAppointment = () => {
               <div className="mt-4 py-2">
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white py-4 rounded-xl text-lg font-semibold hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  disabled={isCreating}
+                  className={`w-full bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white py-4 rounded-xl text-lg font-semibold hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                    isCreating ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                 >
-                  Schedule Appointment
-                  <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>
+                  {isCreating ? 'Scheduling...' : 'Schedule Appointment'}
+                  {!isCreating && <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>}
                 </button>
               </div>
             </div>
