@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { EditDoctorModal } from './EditDoctorModal';
 import type { User } from '../../lib/api/services/users';
 
@@ -10,6 +11,7 @@ interface DoctorCardProps {
 
 export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleEdit = (id: string, doctorData: any) => {
     onEdit(id, doctorData, () => setIsEditModalOpen(false));
@@ -30,7 +32,7 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
               <div className="text-xs text-indigo-700 font-medium mb-1">{doctor.specialization || 'General Dentist'}</div>
               <div className="text-xs text-gray-500">
                 {doctor.availability?.length ? 'Available' : 'Not available'} 
-                <span className="mx-1">•</span> Contact for details
+                <span className="mx-1">•</span> {doctor.email}
               </div>
               <div className="text-xs text-gray-500 mt-1">
                 {doctor.education || 'Professional dental care provider'}
@@ -40,7 +42,10 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
               </div>
             </div>
             <div className="flex flex-col space-y-2">
-              <button className="bg-blue-900 text-white px-4 py-1 rounded text-sm font-medium hover:bg-[#0A0F56] transition">
+              <button 
+                onClick={() => navigate(`/appointments?doctorId=${doctor.id}`)}
+                className="bg-blue-900 text-white px-4 py-1 rounded text-sm font-medium hover:bg-[#0A0F56] transition"
+              >
                 View Appointments
               </button>
               <button 

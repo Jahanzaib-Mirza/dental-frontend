@@ -19,7 +19,7 @@ const PatientList = () => {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-    
+
     const { patients, isLoading, error, isCreating, isUpdating } = useAppSelector((state: RootState) => state.patients);
 
     useEffect(() => {
@@ -53,7 +53,7 @@ const PatientList = () => {
     };
 
     // Filter patients based on search term
-    const filteredPatients = Array.isArray(patients) ? patients.filter(patient => 
+    const filteredPatients = Array.isArray(patients) ? patients.filter(patient =>
         patient.email.toLowerCase().includes(searchTerm.toLowerCase())
     ) : [];
 
@@ -84,16 +84,14 @@ const PatientList = () => {
                         onChange={(e) => setSearchTerm(e.target.value)}
                         className="border rounded-lg p-2 text-xs outline-none"
                     />
-                    <div className="bg-blue-900 text-white p-2 rounded-lg text-xs flex flex-row items-center">
-                        <FaPlus color="white" />
-                        <button 
-                            onClick={() => setIsAddModalOpen(true)}
-                            className="ml-1"
-                            disabled={isCreating}
-                        >
-                            Add Patient
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                        disabled={isCreating}
+                    >
+                        <FaPlus className="mr-2 text-base" />
+                        Add Patient
+                    </button>
                 </div>
             </div>
 
@@ -111,11 +109,11 @@ const PatientList = () => {
                 </div>
             ) : (
                 <>
-                    <PatientTable 
-                        patients={filteredPatients} 
+                    <PatientTable
+                        patients={filteredPatients}
                         onEdit={handleEditClick}
                     />
-                    
+
                     <Pagination
                         currentPage={currentPage}
                         totalPages={Math.ceil(filteredPatients.length / 10)}
