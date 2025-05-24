@@ -1,25 +1,16 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { DoctorFormData } from './AddDoctorModal';
+import type { User } from '../../lib/api/services/users';
 
-interface AddDoctorModalProps {
+interface EditDoctorModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (doctorData: DoctorFormData) => void;
+  onSubmit: (id: string, doctorData: Partial<DoctorFormData>) => void;
   isSubmitting?: boolean;
+  doctor: User;
 }
 
-export interface DoctorFormData {
-  email: string;
-  name: string;
-  gender: string;
-  age: number;
-  experience: number;
-  specialization: string;
-  licenseNumber: string;
-  phone: string;
-  password: string;
-}
-
-export function AddDoctorModal({ isOpen, onClose, onSubmit, isSubmitting }: AddDoctorModalProps) {
+export function EditDoctorModal({ isOpen, onClose, onSubmit, isSubmitting, doctor }: EditDoctorModalProps) {
   const [formData, setFormData] = useState<DoctorFormData>({
     email: '',
     name: '',
@@ -32,9 +23,25 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit, isSubmitting }: AddD
     password: '',
   });
 
+  useEffect(() => {
+    if (doctor) {
+      setFormData({
+        email: doctor.email || '',
+        name: doctor.name || '',
+        gender: doctor.gender || '',
+        age: doctor.age || 0,
+        experience: doctor.experience || 0,
+        specialization: doctor.specialization || '',
+        licenseNumber: doctor.licenseNumber || '',
+        phone: doctor.phone || '',
+        password: '',
+      });
+    }
+  }, [doctor]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(doctor.id, formData);
   };
 
   if (!isOpen) return null;
@@ -43,7 +50,7 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit, isSubmitting }: AddD
     <div className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-md">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg border border-gray-100 relative animate-fadeIn">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold text-gray-900">Add New Doctor</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Edit Doctor</h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
@@ -172,11 +179,11 @@ export function AddDoctorModal({ isOpen, onClose, onSubmit, isSubmitting }: AddD
               className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Doctor'}
+              {isSubmitting ? 'Updating...' : 'Update Doctor'}
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-} 
+}

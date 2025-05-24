@@ -1,31 +1,27 @@
-import { useState, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../../App';
+import { useAppDispatch, useAppSelector } from '../../../lib/hooks';
+import { login, clearError } from '../../../lib/store/slices/authSlice';
 
-interface LoginFormProps {
-  onSubmit: (credentials: { email: string; password: string }) => void;
-  isLoading: boolean;
-  error: string | null;
-}
-
-export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
+export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
+  
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const dispatch = useAppDispatch();
+  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Call the prop function for backward compatibility
-    onSubmit({ email, password });
-    
-    // Call the context login function
-    login(email, password);
-    
-    // Navigate to home screen after login
-    navigate('/dashboard');
+    dispatch(clearError());
+    await dispatch(login({ email, password }));
   };
 
   return (
@@ -75,7 +71,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
         </div>
         
         {/* Right side - Form */}
-        <div className="w-full md:w-1/2 bg-white p-8 md:p-12">
+        <div className="w-full md:w-1/2 p-8">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold text-[#0A0F56] mb-2">Sign In</h2>
             <p className="text-gray-500">Access your MI dental clinic dashboard</p>
@@ -139,7 +135,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps) {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#0A0F56] hover:bg-[#232a7c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A0F56]"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-[#0A0F56] hover:bg-[#232a7c] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#0A0F56] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
