@@ -1,68 +1,62 @@
+import { useEffect } from 'react';
+import { useAppDispatch, useAppSelector } from '../../lib/hooks';
+import { fetchDoctors, updateDoctor } from '../../lib/store/slices/doctorsSlice';
 import { DoctorCard } from './DoctorCard';
-
-const doctors = [
-  {
-    name: 'Dr. Ayesha Rahman',
-    specialty: 'Orthodontist',
-    time: '10:00am - 2:00pm',
-    date: 'May 20, 2025',
-    description: 'Expert in braces, aligners, and correcting dental irregularities. Passionate about creating beautiful smiles for all ages.',
-    avatar: 'https://randomuser.me/api/portraits/women/11.jpg',
-    gender: 'Female',
-    age: 38,
-    experience: 12,
-  },
-  {
-    name: 'Dr. Imran Chowdhury',
-    specialty: 'Endodontist',
-    time: '11:00am - 3:00pm',
-    date: 'May 21, 2025',
-    description: 'Specialist in root canal treatments and dental pain management. Dedicated to saving natural teeth with advanced techniques.',
-    avatar: 'https://randomuser.me/api/portraits/men/12.jpg',
-    gender: 'Male',
-    age: 45,
-    experience: 18,
-  },
-  {
-    name: 'Dr. Nusrat Jahan',
-    specialty: 'Pediatric Dentist',
-    time: '9:00am - 1:00pm',
-    date: 'May 22, 2025',
-    description: 'Gentle and caring dentist for children. Focused on preventive care and making dental visits fun and stress-free.',
-    avatar: 'https://randomuser.me/api/portraits/women/13.jpg',
-    gender: 'Female',
-    age: 33,
-    experience: 8,
-  },
-  {
-    name: 'Dr. Asif Rahman',
-    specialty: 'Oral Surgeon',
-    time: '2:00pm - 6:00pm',
-    date: 'May 23, 2025',
-    description: 'Performs wisdom tooth extractions, dental implants, and oral surgeries with precision and care.',
-    avatar: 'https://randomuser.me/api/portraits/men/14.jpg',
-    gender: 'Male',
-    age: 41,
-    experience: 15,
-  },
-  {
-    name: 'Dr. Farzana Karim',
-    specialty: 'General Dentist',
-    time: '8:00am - 12:00pm',
-    date: 'May 24, 2025',
-    description: 'Provides comprehensive dental care including checkups, fillings, and preventive treatments for the whole family.',
-    avatar: 'https://randomuser.me/api/portraits/women/15.jpg',
-    gender: 'Female',
-    age: 36,
-    experience: 10,
-  },
-];
+import type { RootState } from '../../lib/store/store';
+import type { User } from '../../lib/api/services/users';
+import { toast } from 'react-hot-toast';
 
 export function DoctorList() {
+  const dispatch = useAppDispatch();
+  const { doctors, isLoading, error, isUpdating } = useAppSelector((state: RootState) => state.doctors);
+
+  useEffect(() => {
+    dispatch(fetchDoctors());
+  }, [dispatch]);
+
+  const handleEditDoctor = async (id: string, doctorData: any, onSuccess: () => void) => {
+    try {
+      await dispatch(updateDoctor({ id, doctorData })).unwrap();
+      toast.success('Doctor updated successfully');
+      onSuccess();
+    } catch (error: any) {
+      toast.error(error);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0A0F56]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-red-500 p-4 bg-red-50 rounded-md">
+        Error loading doctors: {error}
+      </div>
+    );
+  }
+
+  if (doctors.length === 0) {
+    return (
+      <div className="text-gray-500 p-4 bg-gray-50 rounded-md">
+        No doctors found.
+      </div>
+    );
+  }
+
   return (
     <div>
-      {doctors.map((doctor, idx) => (
-        <DoctorCard key={idx} {...doctor} />
+      {doctors.map((doctor: User) => (
+        <DoctorCard
+          key={doctor.id}
+          doctor={doctor}
+          onEdit={handleEditDoctor}
+          isUpdating={isUpdating}
+        />
       ))}
     </div>
   );

@@ -1,20 +1,22 @@
-import React, { useState } from 'react';
-import type { CreatePatientData } from '../../lib/api/services/patients';
+import React, { useState, useEffect } from 'react';
+import type { Patient, CreatePatientData } from '../../lib/api/services/patients';
 
-interface AddPatientModalProps {
+interface EditPatientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (patientData: CreatePatientData) => void;
+  onSubmit: (id: string, patientData: Partial<CreatePatientData>) => void;
+  patient: Patient | null;
   isSubmitting?: boolean;
 }
 
-export const AddPatientModal: React.FC<AddPatientModalProps> = ({
+export const EditPatientModal: React.FC<EditPatientModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
+  patient,
   isSubmitting = false
 }) => {
-  const [formData, setFormData] = useState<CreatePatientData>({
+  const [formData, setFormData] = useState<Partial<CreatePatientData>>({
     name: '',
     email: '',
     phone: '',
@@ -24,6 +26,21 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
     medicalHistory: '',
     allergies: ''
   });
+
+  useEffect(() => {
+    if (patient) {
+      setFormData({
+        name: patient.name,
+        email: patient.email,
+        phone: patient.phone,
+        gender: patient.gender,
+        dob: patient.dob,
+        address: patient.address,
+        medicalHistory: patient.medicalHistory || '',
+        allergies: patient.allergies || ''
+      });
+    }
+  }, [patient]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -35,17 +52,18 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    if (patient) {
+      onSubmit(patient.id, formData);
+    }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !patient) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-md">
       <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg border border-gray-100 relative animate-fadeIn">
         <div className="flex justify-between items-center mb-2">
-          <h2 className="text-2xl font-bold text-gray-900">Add Patient</h2>
+          <h2 className="text-2xl font-bold text-gray-900">Edit Patient</h2>
           <button 
             onClick={onClose} 
             className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
@@ -182,7 +200,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
               className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Adding...' : 'Add Patient'}
+              {isSubmitting ? 'Updating...' : 'Update Patient'}
             </button>
           </div>
         </form>

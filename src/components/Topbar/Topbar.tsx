@@ -1,6 +1,11 @@
+import { useAppSelector } from '../../lib/hooks';
 import { UserProfile } from './UserProfile';
+import type { RootState } from '../../lib/store/store';
 
 export function Topbar() {
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  console.log('Redux user:', user);
+
   return (
     <nav className="bg-[#0A0F56] text-white px-6 py-0.75 flex items-center justify-between shadow-md">
       
@@ -12,8 +17,8 @@ export function Topbar() {
         className="w-8 h-8 rounded-full"
       />
       <div className="text-sm">
-        <p className="font-medium">Northern Central Clinic</p>
-        <p className="text-gray-300">Idaho, United States</p>
+        <p className="font-medium">{user.organization.name}</p>
+        <p className="text-gray-300">{user.organization.address}</p>
       </div>
       <button className="text-gray-300 ml-2">▼</button>
     </div>
@@ -35,13 +40,13 @@ export function Topbar() {
       {/* User Profile */}
       <div className="flex items-center space-x-2">
         <img 
-          src="https://e7.pngegg.com/pngimages/550/169/png-clipart-user-profile-computer-icons-user-interface-female-symbol-miscellaneous-purple-thumbnail.png" 
+          src={user?.profileImage || "https://e7.pngegg.com/pngimages/550/169/png-clipart-user-profile-computer-icons-user-interface-female-symbol-miscellaneous-purple-thumbnail.png"} 
           alt="User Avatar" 
           className="w-8 h-8 rounded-full"
         />
         <div className="text-sm">
-          <p className="font-medium">Arshia</p>
-          <p className="text-gray-300 text-xs">arshia@gmail.com</p>
+          <p className="font-medium">{user?.name || 'Guest'}</p>
+          <p className="text-gray-300 text-xs">{user?.email || 'Not logged in'}</p>
         </div>
       </div>
 
