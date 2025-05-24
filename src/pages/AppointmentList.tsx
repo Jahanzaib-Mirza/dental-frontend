@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import { FaPlus, FaSearch, FaFilter, FaUserMd, FaCalendarAlt, FaListAlt, FaTimesCircle } from "react-icons/fa";
 import { AppointmentTable } from "../components/Appointment/AppointmentTable";
@@ -15,6 +15,7 @@ import type { User } from "../lib/api/services/users";
 const AppointmentList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
@@ -29,6 +30,13 @@ const AppointmentList = () => {
     { value: "complete", label: "Complete" },
     { value: "cancelled", label: "Cancelled" },
   ];
+
+  useEffect(() => {
+    const doctorIdFromUrl = searchParams.get("doctorId");
+    if (doctorIdFromUrl) {
+      setSelectedDoctorId(doctorIdFromUrl);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     dispatch(fetchAppointments())

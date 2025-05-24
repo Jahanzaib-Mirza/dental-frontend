@@ -29,18 +29,16 @@ export default function DoctorAppointment() {
   return (
     <div className="flex-1 px-4 py-6 bg-gray-50 min-h-screen">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">Doctor Appointment</h2>
+      <h1 className="text-2xl sm:text-3xl font-bold text-[#0A0F56]">Doctors</h1>
        
-        <div className="bg-blue-900 text-white p-2 rounded-lg text-xs flex flex-row items-center">
-          <FaPlus color="white" />
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="ml-1"
-            disabled={isCreating}
-          >
-            Add Doctor
-          </button>
-        </div>
+        <button 
+          onClick={() => setIsModalOpen(true)}
+          disabled={isCreating}
+          className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+        >
+          <FaPlus className="mr-2 text-base" />
+          Add Doctor
+        </button>
       </div>
       <div className="mb-4 text-sm text-gray-500">
         <span className="font-semibold text-gray-700">Showing:</span> All Consultations of All Healthcare Providers
