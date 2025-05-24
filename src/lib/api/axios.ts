@@ -1,9 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'https://dental-backend-htv7.onrender.com';
-
 const api = axios.create({
-  baseURL,
   withCredentials: true, // Important for cookies
   headers: {
     'Content-Type': 'application/json',
