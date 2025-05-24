@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import { PatientTable } from '../components/Patient/PatientTable';
 import { Pagination } from '../components/Common/Pagination';
@@ -12,7 +11,6 @@ import type { Patient } from '../lib/api/services/patients';
 import { toast } from 'react-hot-toast';
 
 const PatientList = () => {
-    const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");

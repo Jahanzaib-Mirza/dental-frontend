@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import  { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { FaPlus, FaFilter, FaSearch } from "react-icons/fa";
@@ -75,7 +75,7 @@ const AppointmentList = () => {
     date: new Date(appointment.date).toLocaleDateString(),
     time: appointment.time,
     sex: appointment.patient?.gender || 'N/A',
-    age: appointment.patient?.age || 'N/A',
+    age: appointment.patient?.age || 0,
     disease: appointment.reason,
     status: appointment.status,
     doctor: appointment.doctor?.name || 'N/A',

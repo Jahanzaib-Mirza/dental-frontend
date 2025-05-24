@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { AddPatientModal } from '../components/Patient/AddPatientModal';
-import { FiUser, FiCalendar, FiClock, FiFileText, FiPlus } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { createAppointment } from '../lib/store/slices/appointmentsSlice';
 import { fetchPatients } from '../lib/store/slices/patientsSlice';
@@ -14,10 +14,6 @@ import type { Patient } from '../lib/api/services/patients';
 import type { User } from '../lib/api/services/users';
 import { appointmentService } from '../lib/api/services/appointments';
 
-interface Doctor {
-  id: string;
-  name: string;
-}
 
 const AddAppointment = () => {
   const navigate = useNavigate();
@@ -27,8 +23,8 @@ const AddAppointment = () => {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const { isCreating, createError } = useAppSelector((state: RootState) => state.appointments);
-  const { patients, isLoading: isLoadingPatients } = useAppSelector((state: RootState) => state.patients);
-  const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
+  const { patients } = useAppSelector((state: RootState) => state.patients);
+  const { doctors } = useAppSelector((state: RootState) => state.doctors);
 
   const [formData, setFormData] = useState({
     patientId: '',

@@ -15,7 +15,6 @@ const serviceOptions = [
 
 const AppointmentDetails = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const appointment = location.state?.appointment;
 
   // Editable fields: empty by default
@@ -25,9 +24,9 @@ const AppointmentDetails = () => {
   const [isInternational, setIsInternational] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   // For status dropdowns
-  const [roomNumber, setRoomNumber] = useState('Room Number: 288');
-  const [riskStatus, setRiskStatus] = useState('Risky');
-  const [treatmentStatus, setTreatmentStatus] = useState('Under Treatment');
+  // const [roomNumber, setRoomNumber] = useState('Room Number: 288');
+  // const [riskStatus, setRiskStatus] = useState('Risky');
+  // const [treatmentStatus, setTreatmentStatus] = useState('Under Treatment');
 
   if (!appointment) {
     return (
@@ -209,12 +208,12 @@ const AppointmentDetails = () => {
 };
 
 // Helper Components
-const DetailField = ({ label, value }: { label: string; value: string }) => (
-  <div>
-    <p className="text-sm text-gray-500">{label}</p>
-    <p className="text-sm">{value}</p>
-  </div>
-);
+// const DetailField = ({ label, value }: { label: string; value: string }) => (
+//   <div>
+//     <p className="text-sm text-gray-500">{label}</p>
+//     <p className="text-sm">{value}</p>
+//   </div>
+// );
 
 const FormField = ({ label, value, readOnly = false }: { label: string; value: string; readOnly?: boolean }) => (
   <div>
@@ -228,14 +227,14 @@ const FormField = ({ label, value, readOnly = false }: { label: string; value: s
   </div>
 );
 
-const FormSelect = ({ label, value, options }: { label: string; value: string; options: string[] }) => (
-  <div>
-    <label className="block text-sm mb-2 font-bold text-[#232360]">{label}</label>
-    <select className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]" value={value}>
-      {options.map(opt => <option key={opt}>{opt}</option>)}
-    </select>
-  </div>
-);
+// const FormSelect = ({ label, value, options }: { label: string; value: string; options: string[] }) => (
+//   <div>
+//     <label className="block text-sm mb-2 font-bold text-[#232360]">{label}</label>
+//     <select className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]" value={value}>
+//       {options.map(opt => <option key={opt}>{opt}</option>)}
+//     </select>
+//   </div>
+// );
 
 const FormIconField = ({ label, value, icon, readOnly = false }: { label: string; value: string; icon: React.ReactNode; readOnly?: boolean }) => (
   <div>

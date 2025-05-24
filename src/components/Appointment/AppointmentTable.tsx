@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaPlus } from "react-icons/fa";
 
 interface AppointmentTableProps {
   appointments: Array<{
