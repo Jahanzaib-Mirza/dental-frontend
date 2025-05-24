@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:1337';
+const BASE_URL = 'https://dental-backend-htv7.onrender.com';
 
 export const API_ENDPOINTS = {
   // Auth endpoints
