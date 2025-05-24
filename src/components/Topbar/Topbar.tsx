@@ -1,5 +1,4 @@
 import { useAppSelector } from '../../lib/hooks';
-import { UserProfile } from './UserProfile';
 import type { RootState } from '../../lib/store/store';
 
 export function Topbar() {
@@ -17,8 +16,8 @@ export function Topbar() {
         className="w-8 h-8 rounded-full"
       />
       <div className="text-sm">
-        <p className="font-medium">{user.organization.name}</p>
-        <p className="text-gray-300">{user.organization.address}</p>
+        <p className="font-medium">{user?.organization?.name || 'Clinic Name'}</p>
+        <p className="text-gray-300">{user?.organization?.address || 'Clinic Address'}</p>
       </div>
       <button className="text-gray-300 ml-2">▼</button>
     </div>

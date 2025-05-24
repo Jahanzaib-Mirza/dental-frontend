@@ -17,6 +17,10 @@ export interface User {
   education?: string;
   availability?: any[];
   status: 'active' | 'inactive' | 'suspended';
+  organization: {
+    name: string;
+    address: string;
+  };
 }
 
 export interface CreateUserData {

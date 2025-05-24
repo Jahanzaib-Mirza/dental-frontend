@@ -130,7 +130,12 @@ const PatientProfile = () => {
 };
 
 // Reusable Detail component for cleaner layout
-const Detail = ({ label, value }) => (
+interface DetailProps {
+  label: string;
+  value: string | number;
+}
+
+const Detail = ({ label, value }: DetailProps) => (
   <p>
     <span className="font-medium text-gray-800">{label}:</span>{' '}
     <span className="text-gray-600">{value}</span>
