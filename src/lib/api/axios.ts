@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = 'http://localhost:1337';
+const baseURL = 'https://dental-backend-htv7.onrender.com';
 
 const api = axios.create({
   baseURL,
