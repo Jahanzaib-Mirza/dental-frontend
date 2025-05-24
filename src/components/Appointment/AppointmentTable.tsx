@@ -14,6 +14,7 @@ interface AppointmentTableProps {
     status: string;
     doctor: string;
     image: string;
+    time: string;
   }>;
 }
 
@@ -23,9 +24,9 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex items-center mb-4">
-        <h3 className="text-sm font-medium">Patients List</h3>
+        <h3 className="text-sm font-medium">Appointments List</h3>
         <span className="bg-blue-100 ml-2 text-blue-600 text-xs px-2 py-1 rounded-full">
-          {appointments.length} users
+          {appointments.length} Appointments
         </span>
       </div>
 
@@ -33,8 +34,8 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
         <thead>
           <tr className="bg-gray-100 text-gray-600">
             <th className="text-left p-2">Patient Name</th>
-            <th className="text-left p-2">Patient ID</th>
             <th className="text-left p-2">Date</th>
+            <th className="text-left p-2">Time</th>
             <th className="text-left p-2">Sex</th>
             <th className="text-left p-2">Age</th>
             <th className="text-left p-2">Disease</th>
@@ -61,8 +62,8 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
                   <p className="text-gray-500 text-xxs">{appointment.username}</p>
                 </div>
               </td>
-              <td className="p-2">{appointment.id}</td>
               <td className="p-2">{appointment.date}</td>
+              <td className="p-2">{appointment.time}</td>
               <td className="p-2">{appointment.sex}</td>
               <td className="p-2">{appointment.age}</td>
               <td className="p-2">{appointment.disease}</td>
