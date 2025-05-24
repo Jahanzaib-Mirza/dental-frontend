@@ -115,8 +115,8 @@ const AddAppointment = () => {
           <div className="bg-white rounded-3xl border border-[#E0E3F0] overflow-hidden">
             {/* Header Section */}
             <div className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] px-8 py-2">
-              <h1 className="text-3xl font-bold text-white text-center">Schedule New Appointment</h1>
-              <p className="text-center text-blue-100 mt-1">Fill in the details below to create a new appointment</p>
+              <h1 className="text-2xl font-bold text-white text-center">Schedule New Appointment</h1>
+              {/* <p className="text-center text-blue-100 mt-1">Fill in the details below to create a new appointment</p> */}
             </div>
 
             {createError && (
@@ -246,6 +246,7 @@ const AddAppointment = () => {
                                 value={formData.appointmentDate}
                                 onChange={handleChange}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
+                                disabled={!formData.patientId || !formData.doctorId}
                               />
                             </div>
                             <div className="relative">
