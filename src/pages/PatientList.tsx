@@ -54,7 +54,9 @@ const PatientList = () => {
 
     // Filter patients based on search term
     const filteredPatients = Array.isArray(patients) ? patients.filter(patient =>
-        patient.email.toLowerCase().includes(searchTerm.toLowerCase())
+        patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (patient.phone && patient.phone.toLowerCase().includes(searchTerm.toLowerCase()))
     ) : [];
 
     return (
@@ -62,8 +64,8 @@ const PatientList = () => {
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h2 className="text-xl font-semibold">Patient List</h2>
-                    <p className="text-gray-500 text-xs">
+                <h1 className="text-xl sm:text-3xl font-bold text-[#0A0F56]">Patients</h1>
+                <p className="text-gray-500 text-md">
                         Showing: All Patients and Their Information
                     </p>
                 </div>
@@ -77,13 +79,20 @@ const PatientList = () => {
             + Add Appointment
           </button> */}
                 <div className="flex items-center space-x-3">
-                    <input
-                        type="text"
-                        placeholder="Search by email"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="border rounded-lg p-2 text-xs outline-none"
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
+                            </svg>
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Search by email, name, or phone"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="border border-gray-300 rounded-lg py-2 pl-10 pr-4 text-xs outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-[#0A0F56] transition-all duration-200 shadow-sm hover:shadow-md w-64"
+                        />
+                    </div>
                     <button
                         onClick={() => setIsAddModalOpen(true)}
                         className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -104,8 +113,29 @@ const PatientList = () => {
                     Error loading patients: {error}
                 </div>
             ) : filteredPatients.length === 0 ? (
-                <div className="text-gray-500 p-4 bg-gray-50 rounded-md">
-                    No patients found.
+                <div className="text-center py-12 px-6 border-2 border-dashed border-gray-300 rounded-lg bg-white shadow-sm mt-8">
+                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 className="mt-4 text-lg font-semibold text-gray-800">
+                        {searchTerm ? `No Patients Found for "${searchTerm}"` : "No Patients Registered"}
+                    </h3>
+                    <p className="mt-2 text-sm text-gray-600">
+                        {searchTerm ? "Try adjusting your search term or clear the search." : "Get started by adding your first patient."}
+                    </p>
+                    {!searchTerm && (
+                         <div className="mt-6">
+                            <button
+                                type="button"
+                                onClick={() => setIsAddModalOpen(true)}
+                                className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center mx-auto hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                                disabled={isCreating}
+                            >
+                                <FaPlus className="mr-2 text-base" />
+                                Add Patient
+                            </button>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <>
