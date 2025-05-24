@@ -16,6 +16,7 @@ const navLinks = [
 
 
   { divider: true },
+  { label: 'Invoice', icon: 'document_chart', path: '/invoice' },
   { label: 'Expense', icon: 'document_chart', path: '/expense' },
   { label: 'Account', icon: 'user', path: '/account' },
   { divider: true },

@@ -11,6 +11,7 @@ import Services from '../pages/Services';
 import { AuthContext } from '../App';
 import AppointmentDetails from '../pages/AppointmentDetails';
 import Expense from '../pages/Expense';
+import Invoice from '../pages/Invoice';
 
 // Define UserRole type to fix type errors
 type UserRole = 'admin' | 'doctor' | 'receptionist';
@@ -289,6 +290,14 @@ export const router = createBrowserRouter([
     element: (
       <DashboardLayout user={mockUser}>
         <Expense />
+      </DashboardLayout>
+    ),
+  },
+  {
+    path: '/invoice',
+    element: (
+      <DashboardLayout user={mockUser}>
+        <Invoice />
       </DashboardLayout>
     ),
   }

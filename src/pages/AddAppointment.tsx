@@ -46,7 +46,7 @@ const AddAppointment = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] py-2 px-2 sm:px-6 flex flex-col items-center">
+    <div className="min-h-scren bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] py-2 px-2 sm:px-6 flex flex-col items-center">
       <div className="w-full max-w-4xl">
         <form onSubmit={handleSubmit}>
           <div className="bg-white rounded-3xl shadow-2xl border border-[#E0E3F0] px-8 md:p-6">

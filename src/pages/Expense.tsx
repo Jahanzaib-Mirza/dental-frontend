@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiSearch, FiFilter, FiEdit2, FiTrash2, FiPlus } from 'react-icons/fi';
 
 interface ExpenseStats {
@@ -24,14 +24,24 @@ function AddExpenseModal({ isOpen, onClose, onSubmit }: {
   onClose: () => void;
   onSubmit: (data: Omit<Expense, 'id'>) => void;
 }) {
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     date: '',
     description: '',
     category: '',
     amount: '',
     status: 'Pending',
-  });
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
+
+  // Reset form when modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setFormData(initialFormData);
+      setReceiptFile(null);
+    }
+  }, [isOpen]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -96,10 +106,17 @@ function AddExpenseModal({ isOpen, onClose, onSubmit }: {
               onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
             >
               <option value="">Select category</option>
-              <option value="Supplies">Supplies</option>
-              <option value="Equipment">Equipment</option>
-              <option value="Services">Services</option>
-              <option value="Utilities">Utilities</option>
+              <option value="Insurance">Insurance</option>
+              <option value="Advertising">Advertising</option>
+              <option value="Fees">Fees</option>
+              <option value="Tool">Tool</option>
+              <option value="Meal">Meal</option>
+              <option value="Office Expense">Office Expense</option>
+              <option value="Taxes">Taxes</option>
+              <option value="License">License</option>
+              <option value="Vehicle">Vehicle</option>
+              <option value="Payroll">Payroll</option>
+              <option value="Others">Others</option>
             </select>
           </div>
           <div>
@@ -151,6 +168,7 @@ export default function Expense() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState('Year 2025');
+  const [categoryFilter, setCategoryFilter] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([
     {
       id: '681e9711d8f0dd001c98b024',
@@ -198,6 +216,31 @@ export default function Expense() {
       paymentMethod: 'Credit Card'
     }
   ]);
+
+  // List of categories for filter dropdown
+  const categories = [
+    'Insurance',
+    'Advertising',
+    'Fees',
+    'Tools',
+    'Meals',
+    'Office Expense',
+    'Taxes',
+    'License',
+    'Vehicle',
+    'Payroll',
+    'Other',
+  ];
+
+  // Filtered expenses based on search and category
+  const filteredExpenses = expenses.filter(expense => {
+    const matchesSearch =
+      expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      expense.category.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      !categoryFilter || expense.category.toLowerCase() === categoryFilter.toLowerCase();
+    return matchesSearch && matchesCategory;
+  });
 
   const stats: ExpenseStats[] = [
     { label: 'Total Expense', amount: '$1220.02', count: 49 },
@@ -253,6 +296,17 @@ export default function Expense() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          {/* Category Filter Dropdown */}
+          <select
+            className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white"
+            value={categoryFilter}
+            onChange={e => setCategoryFilter(e.target.value)}
+          >
+            <option value="">All Categories</option>
+            {categories.map(cat => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
           <button className="flex items-center space-x-1 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-200">
             <FiFilter className="w-4 h-4" />
             <span>All</span>
@@ -287,7 +341,7 @@ export default function Expense() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {expenses.map((expense) => (
+              {filteredExpenses.map((expense) => (
                 <tr key={expense.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 underline">{expense.id}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{expense.date}</td>
