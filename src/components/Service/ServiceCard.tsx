@@ -1,13 +1,17 @@
-interface ServiceCardProps {
+interface ServiceProps {
   title: string;
   description: string;
   price: string;
   features: string[];
-  onEdit: () => void;
-  onDelete: () => void;
+  image?: string;
 }
 
-export function ServiceCard({ title, description, price, features, onEdit, onDelete }: ServiceCardProps) {
+export function Service({
+  title,
+  description,
+  price,
+  features
+}: ServiceProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
       {/* Card Header with Gradient Background */}
@@ -21,7 +25,7 @@ export function ServiceCard({ title, description, price, features, onEdit, onDel
           </div>
           <div className="flex space-x-2">
             <button 
-              onClick={onEdit}
+              onClick={() => {}}
               className="text-white/90 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors duration-200"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,7 +33,7 @@ export function ServiceCard({ title, description, price, features, onEdit, onDel
               </svg>
             </button>
             <button 
-              onClick={onDelete}
+              onClick={() => {}}
               className="text-white/90 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors duration-200"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
