@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import type { CreatePatientData } from '../../lib/api/services/patients';
+import { useAppDispatch } from '../../lib/hooks';
+import { createPatient } from '../../lib/store/slices/patientsSlice';
+import { toast } from 'react-hot-toast';
 
 interface AddPatientModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (patientData: CreatePatientData) => void;
+  onSubmit: (patientData: any) => void;
   isSubmitting?: boolean;
 }
 
@@ -12,8 +15,9 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
-  isSubmitting = false
 }) => {
+  const dispatch = useAppDispatch();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<CreatePatientData>({
     name: '',
     email: '',
@@ -33,10 +37,18 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
-    onClose();
+    setIsLoading(true);
+    
+    try {
+      const result = await dispatch(createPatient(formData)).unwrap();
+      onSubmit(result);
+    } catch (error: any) {
+      toast.error(error || 'Failed to create patient');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -173,16 +185,16 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
               type="button"
               onClick={onClose}
               className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-100 transition"
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
               className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isLoading}
             >
-              {isSubmitting ? 'Adding...' : 'Add Patient'}
+              {isLoading ? 'Adding...' : 'Add Patient'}
             </button>
           </div>
         </form>

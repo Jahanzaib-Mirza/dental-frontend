@@ -11,25 +11,25 @@ import Services from '../pages/Services';
 import AppointmentDetails from '../pages/AppointmentDetails';
 import Expense from '../pages/Expense';
 import Invoice from '../pages/Invoice';
+import { useSelector } from 'react-redux';
+import type { RootState } from '../lib/store/store';
 
 // Define UserRole type to fix type errors
-type UserRole = 'admin' | 'doctor' | 'receptionist';
 
-// Define User type to match expected structure
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  clinicId: string;
-}
 
-const mockUser: User = {
-  id: '1',
-  email: 'admin@clinic.com',
-  name: 'Abu Fahim',
-  role: 'admin',
-  clinicId: 'clinic-1',
+// Create a wrapper component to provide user from Redux
+const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
+  const user = useSelector((state: RootState) => state.auth.user);
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return (
+    <DashboardLayout user={user}>
+      {children}
+    </DashboardLayout>
+  );
 };
 
 export const router = createBrowserRouter([
@@ -45,9 +45,9 @@ export const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <div>Dashboard Content</div>
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -55,9 +55,9 @@ export const router = createBrowserRouter([
     path: '/doctors',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <DoctorAppointment />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -65,9 +65,9 @@ export const router = createBrowserRouter([
     path: '/appointments',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <AppointmentTable />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -75,9 +75,9 @@ export const router = createBrowserRouter([
     path: '/patients',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <PatientList />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -85,9 +85,9 @@ export const router = createBrowserRouter([
     path: '/services',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <Services />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -95,9 +95,9 @@ export const router = createBrowserRouter([
     path: '/add-appointment',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <AddAppointment />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -105,9 +105,9 @@ export const router = createBrowserRouter([
     path: '/patient-profile',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <PatientProfile />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
@@ -115,26 +115,30 @@ export const router = createBrowserRouter([
     path: '/appointment-details',
     element: (
       <ProtectedRoute>
-        <DashboardLayout>
+        <DashboardWrapper>
           <AppointmentDetails />
-        </DashboardLayout>
+        </DashboardWrapper>
       </ProtectedRoute>
     ),
   },
   {
     path: '/expense',
     element: (
-      <DashboardLayout user={mockUser}>
-        <Expense />
-      </DashboardLayout>
+      <ProtectedRoute>
+        <DashboardWrapper>
+          <Expense />
+        </DashboardWrapper>
+      </ProtectedRoute>
     ),
   },
   {
     path: '/invoice',
     element: (
-      <DashboardLayout user={mockUser}>
-        <Invoice />
-      </DashboardLayout>
+      <ProtectedRoute>
+        <DashboardWrapper>
+          <Invoice />
+        </DashboardWrapper>
+      </ProtectedRoute>
     ),
-  }
+  },
 ]);

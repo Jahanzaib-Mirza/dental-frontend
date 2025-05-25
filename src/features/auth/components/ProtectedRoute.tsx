@@ -1,12 +1,12 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '../../../lib/hooks';
-
+import type { RootState } from '../../../lib/store/store';
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { isAuthenticated, isLoading } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, isLoading } = useAppSelector((state: RootState) => state.auth);
   const location = useLocation();
 
   if (isLoading) {

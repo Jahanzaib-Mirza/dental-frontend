@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../../lib/hooks';
 import { login, clearError } from '../../../lib/store/slices/authSlice';
+import type { RootState } from '../../../lib/store/store';
 
 export function LoginForm() {
   const [email, setEmail] = useState('');
@@ -10,7 +11,7 @@ export function LoginForm() {
   
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { isLoading, error, isAuthenticated } = useAppSelector((state) => state.auth);
+  const { isLoading, error, isAuthenticated } = useAppSelector((state: RootState) => state.auth);
 
   useEffect(() => {
     if (isAuthenticated) {

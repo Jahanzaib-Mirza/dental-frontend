@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import  { useState, useEffect, useMemo } from "react";
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { FaPlus, FaFilter, FaSearch } from "react-icons/fa";
@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 import { type Appointment } from "../lib/api/services/appointments";
 import type { RootState } from "../lib/store/store";
 import type { User } from "../lib/api/services/users";
+import { calculateAge } from "../lib/utils/dateUtils";
 
 const AppointmentList = () => {
   const navigate = useNavigate();
@@ -24,10 +25,10 @@ const AppointmentList = () => {
   const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
 
   const appointmentStatusOptions = [
-    { value: "Pending", label: "Pending" },
-    { value: "Confirmed", label: "Confirmed" },
-    { value: "Complete", label: "Complete" },
-    { value: "Cancelled", label: "Cancelled" },
+    { value: "pending", label: "Pending" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "complete", label: "Complete" },
+    { value: "cancelled", label: "Cancelled" },
   ];
 
   useEffect(() => {
@@ -75,11 +76,11 @@ const AppointmentList = () => {
     date: new Date(appointment.date).toLocaleDateString(),
     time: appointment.time,
     sex: appointment.patient?.gender || 'N/A',
-    age: appointment.patient?.age || 'N/A',
+    age: appointment.patient?.dob ? calculateAge(appointment.patient.dob) : 0,
     disease: appointment.reason,
     status: appointment.status,
     doctor: appointment.doctor?.name || 'N/A',
-    image: appointment.patient?.profileImage || 'https://i.pravatar.cc/40?img=1',
+    image: 'https://i.pravatar.cc/40?img=1',
   }));
 
   if (isLoading) {
