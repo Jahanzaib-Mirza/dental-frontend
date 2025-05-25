@@ -99,9 +99,22 @@ const AddAppointment = () => {
     }
   };
 
-  const handleAddPatient = (patientData: any) => {
-    console.log('New patient data:', patientData);
-    setIsPatientModalOpen(false);
+  const handleAddPatient = async (patientData: any) => {
+    try {
+      // Refresh the patients list
+      await dispatch(fetchPatients()).unwrap();
+      
+      // Set the newly added patient as selected
+      setFormData(prev => ({
+        ...prev,
+        patientId: patientData.id
+      }));
+      
+      setIsPatientModalOpen(false);
+      toast.success('Patient added successfully');
+    } catch (error: any) {
+      toast.error(error || 'Failed to add patient');
+    }
   };
 
   return (
