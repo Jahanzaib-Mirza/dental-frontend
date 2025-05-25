@@ -166,7 +166,7 @@ function AddExpenseModal({ isOpen, onClose, onSubmit }: {
 export default function Expense() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [selectedYear, setSelectedYear] = useState('Year 2025');
+  const [selectedYear] = useState('Year 2025');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [expenses, setExpenses] = useState<Expense[]>([
     {

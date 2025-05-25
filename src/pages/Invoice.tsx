@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { FiSearch, FiFilter } from 'react-icons/fi';
 
 interface Invoice {
@@ -15,8 +15,7 @@ interface Invoice {
 
 export default function Invoice() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedDateRange, setSelectedDateRange] = useState('May 11, 2025 - May 24, 2025');
-  const [invoices, setInvoices] = useState<Invoice[]>([
+  const [invoices] = useState<Invoice[]>([
     {
       id: '#000812',
       inspectionId: 'INS-0000002878',
