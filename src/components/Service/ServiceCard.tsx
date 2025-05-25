@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface ServiceProps {
   title: string;
   description: string;
@@ -12,27 +10,53 @@ export function Service({
   title,
   description,
   price,
-  features,
-  image
+  features
 }: ServiceProps) {
   return (
-    <div className="flex items-start space-x-5 py-6 px-4 border-b border-gray-100 bg-white hover:bg-gray-50 transition group">
-      {image && (
-        <div className="w-16 h-16 rounded-xl bg-gray-100 flex items-center justify-center shadow-sm mr-2">
-          <img src={image} alt={title} className="w-12 h-12 object-cover rounded-lg" />
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-100">
+      {/* Card Header with Gradient Background */}
+      <div className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] p-4">
+        <div className="flex justify-between items-start">
+          <div>
+            <h3 className="text-lg font-bold text-white truncate">{title}</h3>
+            <div className="text-sm font-medium text-white/80 mt-1">
+              {price}
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => {}}
+              className="text-white/90 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button 
+              onClick={() => {}}
+              className="text-white/90 hover:text-white hover:bg-white/10 p-1.5 rounded-lg transition-colors duration-200"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
         </div>
-      )}
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-1">
-          <h3 className="text-lg font-bold text-gray-900 truncate group-hover:text-[#0A0F56] transition">{title}</h3>
-          <span className="text-base font-semibold text-[#0A0F56] bg-gray-100 px-3 py-1 rounded-lg shadow-sm">{price}</span>
-        </div>
-        <p className="mt-1 text-sm text-gray-600 leading-relaxed">{description}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {features.map((feature, idx) => (
-            <span key={idx} className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#F0F4FF] text-[#0A0F56] shadow-sm border border-[#E0E3F0]">
-              {feature}
-            </span>
+      </div>
+
+      {/* Card Body */}
+      <div className="p-5">
+        <p className="text-gray-600 text-sm mb-4 line-clamp-2">{description}</p>
+        
+        {/* Features Grid */}
+        <div className="grid grid-cols-2 gap-2">
+          {features.map((feature, index) => (
+            <div key={index} className="flex items-center text-sm text-gray-700 bg-gray-50 px-3 py-2 rounded-lg">
+              <svg className="w-4 h-4 text-[#0A0F56] mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span className="truncate font-medium">{feature}</span>
+            </div>
           ))}
         </div>
       </div>

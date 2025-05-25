@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 import { AddPatientModal } from '../components/Patient/AddPatientModal';
-import { FiUser, FiCalendar, FiClock, FiFileText, FiPlus } from 'react-icons/fi';
+import { FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { createAppointment } from '../lib/store/slices/appointmentsSlice';
 import { fetchPatients } from '../lib/store/slices/patientsSlice';
@@ -14,10 +14,6 @@ import type { Patient } from '../lib/api/services/patients';
 import type { User } from '../lib/api/services/users';
 import { appointmentService } from '../lib/api/services/appointments';
 
-interface Doctor {
-  id: string;
-  name: string;
-}
 
 const AddAppointment = () => {
   const navigate = useNavigate();
@@ -27,8 +23,8 @@ const AddAppointment = () => {
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
   const { isCreating, createError } = useAppSelector((state: RootState) => state.appointments);
-  const { patients, isLoading: isLoadingPatients } = useAppSelector((state: RootState) => state.patients);
-  const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
+  const { patients } = useAppSelector((state: RootState) => state.patients);
+  const { doctors } = useAppSelector((state: RootState) => state.doctors);
 
   const [formData, setFormData] = useState({
     patientId: '',
@@ -73,8 +69,27 @@ const AddAppointment = () => {
     fetchSlots();
   }, [formData.appointmentDate, formData.doctorId]);
 
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  const isTimeInPast = (date: string, time: string) => {
+    const selectedDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
+    return selectedDateTime < now;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    
+    if (name === 'appointmentTime' && formData.appointmentDate) {
+      if (isTimeInPast(formData.appointmentDate, value)) {
+        toast.error('Cannot select a time that has already passed');
+        return;
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -103,9 +118,22 @@ const AddAppointment = () => {
     }
   };
 
-  const handleAddPatient = (patientData: any) => {
-    console.log('New patient data:', patientData);
-    setIsPatientModalOpen(false);
+  const handleAddPatient = async (patientData: any) => {
+    try {
+      // Refresh the patients list
+      await dispatch(fetchPatients()).unwrap();
+      
+      // Set the newly added patient as selected
+      setFormData(prev => ({
+        ...prev,
+        patientId: patientData.id
+      }));
+      
+      setIsPatientModalOpen(false);
+      toast.success('Patient added successfully');
+    } catch (error: any) {
+      toast.error(error || 'Failed to add patient');
+    }
   };
 
   return (
@@ -245,6 +273,7 @@ const AddAppointment = () => {
                                 name="appointmentDate"
                                 value={formData.appointmentDate}
                                 onChange={handleChange}
+                                min={getMinDate()}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
                                 disabled={!formData.patientId || !formData.doctorId}
                               />

@@ -144,6 +144,8 @@ export default function Services() {
       price: serviceData.price,
       features: serviceData.features
     };
+
+    // Add the new service to the list
     setServiceList([...serviceList, newService]);
   };
 
@@ -152,19 +154,19 @@ export default function Services() {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-xl font-semibold">Services List</h2>
-          <p className="text-gray-500 text-xs">
+          <h2 className="text-xl sm:text-3xl font-bold text-[#0A0F56]">Services</h2>
+          <p className="text-gray-500 text-md">
             Manage all dental services and treatments
           </p>
         </div>
         <div className="flex items-center space-x-3">
-          <div 
-            className="bg-[#0A0F56] text-white p-2 rounded-lg text-xs flex flex-row items-center cursor-pointer"
+          <button
             onClick={handleAddButtonClick}
+            className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            <FaPlus color="white" />
-            <span className="ml-1">Add Service</span>
-          </div>
+            <FaPlus className="mr-2 text-base" />
+            Add Service
+          </button>
         </div>
       </div>
 
