@@ -9,6 +9,8 @@ import AddAppointment from '../pages/AddAppointment';
 import PatientProfile from '../pages/PatientProfile';
 import Services from '../pages/Services';
 import AppointmentDetails from '../pages/AppointmentDetails';
+import Expense from '../pages/Expense';
+import Invoice from '../pages/Invoice';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../lib/store/store';
 
@@ -18,7 +20,7 @@ import type { RootState } from '../lib/store/store';
 // Create a wrapper component to provide user from Redux
 const DashboardWrapper = ({ children }: { children: React.ReactNode }) => {
   const user = useSelector((state: RootState) => state.auth.user);
-  
+
   if (!user) {
     return <Navigate to="/login" replace />;
   }
@@ -115,6 +117,26 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <DashboardWrapper>
           <AppointmentDetails />
+        </DashboardWrapper>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/expense',
+    element: (
+      <ProtectedRoute>
+        <DashboardWrapper>
+          <Expense />
+        </DashboardWrapper>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/invoice',
+    element: (
+      <ProtectedRoute>
+        <DashboardWrapper>
+          <Invoice />
         </DashboardWrapper>
       </ProtectedRoute>
     ),

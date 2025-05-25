@@ -67,15 +67,6 @@ const PatientList = () => {
                         Showing: All Patients and Their Information
                     </p>
                 </div>
-                {/* <input
-          type="text"
-          placeholder="Search patients..."
-          className="border rounded-lg p-2 text-xs outline-none"
-        />
-          <button className="bg-blue-900 text-white p-2 rounded-lg text-xs"
-          >
-            + Add Appointment
-          </button> */}
                 <div className="flex items-center space-x-3">
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

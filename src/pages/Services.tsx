@@ -1,4 +1,4 @@
-import { ServiceCard } from '../components/Service/ServiceCard';
+import { Service } from '../components/Service/ServiceCard';
 import { useState } from 'react';
 import { FaPlus } from "react-icons/fa";
 import { AddServiceModal } from '../components/Service/AddServiceModal';
@@ -131,34 +131,22 @@ export default function Services() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [serviceList, setServiceList] = useState(services);
 
-  const handleEdit = (serviceId: number) => {
-    console.log('Edit service:', serviceId);
-    // TODO: Implement edit functionality
-  };
-
-  const handleDelete = (serviceId: number) => {
-    console.log('Delete service:', serviceId);
-    // TODO: Implement delete functionality
-  };
-
   const handleAddButtonClick = () => {
     setIsAddModalOpen(true);
   };
 
   const handleAddServiceSubmit = (serviceData: ServiceFormData) => {
-    // Create a new service with form data
     const newService = {
       id: serviceList.length + 1,
       title: serviceData.name,
       description: serviceData.description,
-      image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop", // Default image
+      image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop",
       price: serviceData.price,
       features: serviceData.features
     };
 
     // Add the new service to the list
     setServiceList([...serviceList, newService]);
-    console.log('Added new service:', newService);
   };
 
   return (
@@ -182,18 +170,17 @@ export default function Services() {
         </div>
       </div>
 
-      {/* Services Grid */}
+      {/* Services List */}
       <div className="container mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {serviceList.map((service) => (
-            <ServiceCard
+            <Service
               key={service.id}
               title={service.title}
               description={service.description}
               price={service.price}
               features={service.features}
-              onEdit={() => handleEdit(service.id)}
-              onDelete={() => handleDelete(service.id)}
+              image={service.image}
             />
           ))}
         </div>
