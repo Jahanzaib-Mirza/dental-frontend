@@ -11,6 +11,7 @@ import { toast } from "react-hot-toast";
 import { type Appointment } from "../lib/api/services/appointments";
 import type { RootState } from "../lib/store/store";
 import type { User } from "../lib/api/services/users";
+import { calculateAge } from "../lib/utils/dateUtils";
 
 const AppointmentList = () => {
   const navigate = useNavigate();
@@ -75,11 +76,11 @@ const AppointmentList = () => {
     date: new Date(appointment.date).toLocaleDateString(),
     time: appointment.time,
     sex: appointment.patient?.gender || 'N/A',
-    age: appointment.patient?.age || 0,
+    age: appointment.patient?.dob ? calculateAge(appointment.patient.dob) : 0,
     disease: appointment.reason,
     status: appointment.status,
     doctor: appointment.doctor?.name || 'N/A',
-    image: appointment.patient?.profileImage || 'https://i.pravatar.cc/40?img=1',
+    image: 'https://i.pravatar.cc/40?img=1',
   }));
 
   if (isLoading) {

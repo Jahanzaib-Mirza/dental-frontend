@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Patient } from '../../lib/api/services/patients';
+import { calculateAge } from '../../lib/utils/dateUtils';
 
 interface PatientTableProps {
   patients: Patient[];
@@ -9,19 +10,6 @@ interface PatientTableProps {
 
 export const PatientTable: React.FC<PatientTableProps> = ({ patients, onEdit }) => {
   const navigate = useNavigate();
-
-  const calculateAge = (dob: string) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    
-    return age;
-  };
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
