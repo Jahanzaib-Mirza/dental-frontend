@@ -19,7 +19,7 @@ const navLinks = [
   { label: 'Expense', icon: 'document_chart', path: '/expense' },
   { label: 'Account', icon: 'user', path: '/account' },
   { divider: true },
-  { label: 'Settings', icon: 'settings', path: '/settings' },
+  // { label: 'Settings', icon: 'settings', path: '/settings' },
   { label: 'Log Out', icon: 'logout', path: '/logout', isLogout: true },
 ];
 
@@ -78,9 +78,9 @@ export function Sidebar() {
   return (
     <aside className="w-74 min-h-screen h-screen flex justify-center ">
       <div className="bg-white w-64 h-screen rounded-lg mt-5 drop-shadow-md p-4">
-        <div className="flex items-center justify-center w-full pb-6">
+        <div className="flex items-center justify-center w-full pb-3">
           <span 
-            className="text-2xl font-bold text-primary flex items-center gap-2 cursor-pointer"
+            className="text-3xl flex items-center gap-2 cursor-pointer font-bold text-[#0A0F56]"
             onClick={() => navigate('/dashboard')}
           >
             Medic

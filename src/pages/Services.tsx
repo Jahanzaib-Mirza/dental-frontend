@@ -171,8 +171,8 @@ export default function Services() {
       </div>
 
       {/* Services List */}
-      <div className="bg-white rounded-xl shadow-sm">
-        <div className="divide-y divide-gray-100">
+      <div className="container mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {serviceList.map((service) => (
             <Service
               key={service.id}
