@@ -25,10 +25,10 @@ const AppointmentList = () => {
   const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
 
   const appointmentStatusOptions = [
-    { value: "Pending", label: "Pending" },
-    { value: "Confirmed", label: "Confirmed" },
-    { value: "Complete", label: "Complete" },
-    { value: "Cancelled", label: "Cancelled" },
+    { value: "pending", label: "Pending" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "complete", label: "Complete" },
+    { value: "cancelled", label: "Cancelled" },
   ];
 
   useEffect(() => {
