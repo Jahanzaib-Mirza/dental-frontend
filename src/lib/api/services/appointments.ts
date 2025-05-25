@@ -1,5 +1,7 @@
 import api from '../axios';
 import { API_ENDPOINTS } from '../endpoints';
+import type { Patient } from './patients';
+import type { User } from './users';
 
 export interface Appointment {
     id: string;
@@ -9,18 +11,8 @@ export interface Appointment {
     appointmentTimestamp: number;
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
     notes?: string;
-    patient: {
-        id: string;
-        email: string;
-        name: string;
-        gender: string;
-        age: number;
-        profileImage: string;
-    };
-    doctor: {
-        id: string;
-        name: string;
-    };
+    patient: Patient;
+    doctor: User;
     followUpFor?: {
         id: string;
         date: string;
