@@ -29,13 +29,12 @@ function AddExpenseModal({ isOpen, onClose, onSubmit }: {
     description: '',
     category: '',
     amount: '',
-    status: 'Pending',
+    status: 'Pending' as const,
   };
 
   const [formData, setFormData] = useState(initialFormData);
   const [receiptFile, setReceiptFile] = useState<File | null>(null);
 
-  // Reset form when modal is closed
   useEffect(() => {
     if (!isOpen) {
       setFormData(initialFormData);
@@ -217,7 +216,6 @@ export default function Expense() {
     }
   ]);
 
-  // List of categories for filter dropdown
   const categories = [
     'Insurance',
     'Advertising',
@@ -232,7 +230,6 @@ export default function Expense() {
     'Other',
   ];
 
-  // Filtered expenses based on search and category
   const filteredExpenses = expenses.filter(expense => {
     const matchesSearch =
       expense.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -258,7 +255,7 @@ export default function Expense() {
   };
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gray-50 w-full">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((stat, index) => (
@@ -296,7 +293,6 @@ export default function Expense() {
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          {/* Category Filter Dropdown */}
           <select
             className="border rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white"
             value={categoryFilter}
@@ -330,27 +326,27 @@ export default function Expense() {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense Type</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspection Address</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense ID</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense Category</th>
+                {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expense Type</th> */}
+                {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspection Address</th> */}
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Frequency</th>
+                <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredExpenses.map((expense) => (
                 <tr key={expense.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600 underline">{expense.id}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{expense.date}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{expense.category}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">General</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">N/A</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">Weekly</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${expense.amount.toFixed(2)}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                  <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600 underline">{expense.id}</td>
+                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{expense.date}</td>
+                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">{expense.category}</td>
+                  {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">General</td> */}
+                  {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">N/A</td> */}
+                  <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">Weekly</td>
+                  <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${expense.amount.toFixed(2)}</td>
+                  <td className="px-5 py-4 whitespace-nowrap text-center">
                     <div className="flex justify-center space-x-2">
                       <button className="text-blue-600 hover:text-blue-900 bg-blue-100 p-2 rounded-lg">
                         <FiEdit2 className="w-4 h-4" />
@@ -367,7 +363,6 @@ export default function Expense() {
         </div>
       </div>
 
-      {/* Add Expense Modal */}
       <AddExpenseModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}

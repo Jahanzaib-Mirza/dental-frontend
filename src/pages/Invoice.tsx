@@ -43,9 +43,9 @@ export default function Invoice() {
 
   const stats = [
     { label: 'Total Invoices', count: 13, amount: '$10684.00', bgColor: 'bg-blue-50' },
-    { label: 'Unsent', count: 0, amount: '$0.00', bgColor: 'bg-gray-50' },
+    // { label: 'Unsent', count: 0, amount: '$0.00', bgColor: 'bg-gray-50' },
     { label: 'Due', count: 0, amount: '$0.00', bgColor: 'bg-orange-50' },
-    { label: 'Past Due', count: 13, amount: '$10684.00', bgColor: 'bg-red-50' },
+    // { label: 'Past Due', count: 13, amount: '$10684.00', bgColor: 'bg-red-50' },
     { label: 'Paid', count: 0, amount: '$0.00', bgColor: 'bg-green-50' }
   ];
 
@@ -63,10 +63,10 @@ export default function Invoice() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] flex flex-col items-center p-4">
-      <div className="w-full max-w-7xl">
+    <div className="bg-gradient-to-br min-h-screen from-[#f4f6fb] to-[#e9eaf7] flex flex-col items-center p-4">
+      <div className="flex flex-col mb-6">
         {/* Stats Grid */}
-        <div className="flex flex-wrap justify-center gap-4 mb-8 ">
+        <div className="flex flex-wrap justify-center gap-2 mb-8 ">
           {stats.map((stat, index) => (
             <div
               key={index}
@@ -84,23 +84,20 @@ export default function Invoice() {
         </div>
 
         {/* Filters and Search */}
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
-          <button className="flex items-center space-x-2 text-gray-600 text-sm border rounded-lg px-4 py-2 bg-white hover:bg-gray-50 shadow">
-            <span>{selectedDateRange}</span>
-            <FiFilter className="w-4 h-4" />
-          </button>
-          <div className="flex items-center space-x-4 w-full sm:w-auto">
-            <div className="relative flex-1 sm:flex-initial">
+        <div className="flex sm:flex-row justify-end mb-6">
+          
+          <div className="flex items-center space-x-4 sm:w-auto">
+            <div className="relative sm:flex-initial">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search..."
-                className="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white shadow"
+                className="sm:w-64 pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white shadow"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="flex items-center space-x-2 bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow">
+            <button className="flex items-center bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow">
               <span>All</span>
               <FiFilter className="w-4 h-4" />
             </button>
@@ -108,35 +105,35 @@ export default function Invoice() {
         </div>
 
         {/* Invoice Table */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 ">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspection ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Provider</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Amount</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
+                  {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspection ID</th> */}
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
+                  {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th> */}
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Amount</th>
+                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {invoices.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.inspectionId}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.address}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.serviceName}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.serviceProvider}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.created}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${invoice.amount.toFixed(2)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.id}</td>
+                    {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.inspectionId}</td> */}
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
+                    {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.address}</td> */}
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.serviceName}</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.serviceProvider}</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.created}</td>
+                    <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${invoice.amount.toFixed(2)}</td>
+                    <td className="px-5 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(invoice.status)}`}>
                         {invoice.status}
                       </span>
