@@ -69,8 +69,27 @@ const AddAppointment = () => {
     fetchSlots();
   }, [formData.appointmentDate, formData.doctorId]);
 
+  const getMinDate = () => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  };
+
+  const isTimeInPast = (date: string, time: string) => {
+    const selectedDateTime = new Date(`${date}T${time}`);
+    const now = new Date();
+    return selectedDateTime < now;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
+    
+    if (name === 'appointmentTime' && formData.appointmentDate) {
+      if (isTimeInPast(formData.appointmentDate, value)) {
+        toast.error('Cannot select a time that has already passed');
+        return;
+      }
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -254,6 +273,7 @@ const AddAppointment = () => {
                                 name="appointmentDate"
                                 value={formData.appointmentDate}
                                 onChange={handleChange}
+                                min={getMinDate()}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
                                 disabled={!formData.patientId || !formData.doctorId}
                               />
