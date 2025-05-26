@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FiClock, FiCalendar, FiUpload, FiPaperclip, FiEye, FiTrash2 } from 'react-icons/fi';
+import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2 } from 'react-icons/fi';
 import Select from 'react-select';
 import type { MultiValue } from 'react-select';
 import { appointmentService } from '../lib/api/services/appointments';
@@ -8,6 +8,8 @@ import { toast } from 'react-hot-toast';
 import { AttachReportModal } from '../components/Report/AttachReportModal';
 import type { ReportData } from '../components/Report/AttachReportModal';
 import { calculateAge } from '../lib/utils/dateUtils';
+import InitialAvatar from '../components/Common/InitialAvatar';
+import { getInitials } from '../lib/utils/stringUtils';
 
 const serviceOptions = [
   { value: 'consultation', label: 'Consultation' },
@@ -28,7 +30,7 @@ const AppointmentDetails = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [selectedServices, setSelectedServices] = useState<MultiValue<{ value: string; label: string }>>([]);
   // const [isInternational, setIsInternational] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFile] = useState<File | null>(null);
 
   // Follow-up state
   const [isFollowUpEnabled, setIsFollowUpEnabled] = useState(false);
@@ -56,12 +58,12 @@ const AppointmentDetails = () => {
     );
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
+  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = event.target.files?.[0];
+  //   if (file) {
+  //     setSelectedFile(file);
+  //   }
+  // };
 
   const handleSave = () => {
     // Here you would typically send the data to your backend
@@ -99,7 +101,7 @@ const AppointmentDetails = () => {
     const day = today.getDate().toString().padStart(2, '0');
     return `${today.getFullYear()}-${month}-${day}`;
   };
-  
+
   const handleFollowUpDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFollowUpDate(e.target.value);
     // Reset time when date changes
@@ -112,9 +114,9 @@ const AppointmentDetails = () => {
     const selectedDateTime = new Date(`${followUpDate}T${selectedTime}`);
 
     if (followUpDate === getMinDate() && selectedDateTime < now) {
-        toast.error("Cannot select a past time for today's follow-up.");
-        setFollowUpTime(''); // Reset time
-        return;
+      toast.error("Cannot select a past time for today's follow-up.");
+      setFollowUpTime(''); // Reset time
+      return;
     }
     setFollowUpTime(selectedTime);
   };
@@ -134,11 +136,11 @@ const AppointmentDetails = () => {
   // Basic image preview for attached reports (can be expanded)
   const handlePreviewReportImage = (report: ReportData) => {
     if (report.image) {
-        const imageUrl = URL.createObjectURL(report.image);
-        // Open in new tab or a dedicated image viewer modal
-        window.open(imageUrl, '_blank');
+      const imageUrl = URL.createObjectURL(report.image);
+      // Open in new tab or a dedicated image viewer modal
+      window.open(imageUrl, '_blank');
     } else {
-        toast.error('No image to preview for this report.');
+      toast.error('No image to preview for this report.');
     }
   };
 
@@ -152,11 +154,10 @@ const AppointmentDetails = () => {
             {/* Patient Image, Name, Age/Gender */}
             <div className="flex flex-col items-center mb-8">
               <div className="relative mb-2">
-                <img
-                  src={appointment.patient.image}
-                  alt={appointment.patient.name}
-                  className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-                />
+                <InitialAvatar initials={getInitials(appointment.patient.name)} size={24}
+                  bgColor="bg-blue-500"
+                  textColor="text-white"
+                  className="border-none font-bold shadow-none text-s" />
                 <div className="absolute -bottom-1 -right-1 w-7 h-7 bg-[#2563EB] rounded-full flex items-center justify-center border-2 border-white">
                   <span className="text-white text-lg">✓</span>
                 </div>
@@ -208,27 +209,27 @@ const AppointmentDetails = () => {
                 <FormField label="Doctor" value={appointment.doctor.name} readOnly />
                 <FormField label="Patient Name" value={appointment.patient.name} readOnly />
                 {/* Services Multi-Select */}
-              
+
                 <FormIconField label="Date of Consultation" value={appointment.date ? new Date(appointment.date).toLocaleDateString() : 'N/A'} icon={<FiCalendar className="text-[#2563EB] mr-2" />} readOnly />
                 <FormIconField label="Start Time" value={appointment.time} icon={<FiClock className="text-[#2563EB] mr-2" />} readOnly />
               </div>
               <div className="col-span-2">
-                  <label className="block text-sm mb-2 font-bold text-[#232360]">Services</label>
-                  <Select
-                    isMulti
-                    options={serviceOptions}
-                    value={selectedServices}
-                    onChange={setSelectedServices}
-                    classNamePrefix="react-select"
-                    placeholder="Select services..."
-                    styles={{
-                      control: (base, state) => ({ ...base, minHeight: '44px', borderRadius: '0.75rem', borderColor: state.isFocused ? '#2563EB' : '#B6C3E6', boxShadow: state.isFocused ? '0 0 0 2px #2563EB33' : 'none', background: '#F7F8FA', fontWeight: 600 }),
-                      multiValue: (base) => ({ ...base, backgroundColor: '#2563EB22', color: '#232360', fontWeight: 600 }),
-                      option: (base, state) => ({ ...base, backgroundColor: state.isSelected ? '#0A0F56' : state.isFocused ? '#F0F4FF' : 'white', color: state.isSelected ? 'white' : '#232360', fontWeight: 600 }),
-                      placeholder: (base) => ({ ...base, color: '#A0AEC0', fontWeight: 500 }),
-                    }}
-                  />
-                </div>
+                <label className="block text-sm mb-2 font-bold text-[#232360]">Services</label>
+                <Select
+                  isMulti
+                  options={serviceOptions}
+                  value={selectedServices}
+                  onChange={setSelectedServices}
+                  classNamePrefix="react-select"
+                  placeholder="Select services..."
+                  styles={{
+                    control: (base, state) => ({ ...base, minHeight: '44px', borderRadius: '0.75rem', borderColor: state.isFocused ? '#2563EB' : '#B6C3E6', boxShadow: state.isFocused ? '0 0 0 2px #2563EB33' : 'none', background: '#F7F8FA', fontWeight: 600 }),
+                    multiValue: (base) => ({ ...base, backgroundColor: '#2563EB22', color: '#232360', fontWeight: 600 }),
+                    option: (base, state) => ({ ...base, backgroundColor: state.isSelected ? '#0A0F56' : state.isFocused ? '#F0F4FF' : 'white', color: state.isSelected ? 'white' : '#232360', fontWeight: 600 }),
+                    placeholder: (base) => ({ ...base, color: '#A0AEC0', fontWeight: 500 }),
+                  }}
+                />
+              </div>
               <FormTextArea
                 label="Medicines"
                 value={reason}
@@ -284,7 +285,7 @@ const AppointmentDetails = () => {
                         className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]"
                         disabled={!appointment?.doctor.id} // Disable if no doctorId
                       />
-                       {!appointment?.doctor.id && <p className="text-xs text-red-500 mt-1">Doctor ID not available for slot booking.</p>}
+                      {!appointment?.doctor.id && <p className="text-xs text-red-500 mt-1">Doctor ID not available for slot booking.</p>}
                     </div>
                     <div>
                       <label className="block text-sm mb-1 font-bold text-[#232360]">Follow-up Time</label>
@@ -314,46 +315,46 @@ const AppointmentDetails = () => {
               {/* Attach Report Section */}
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-[#232360]">Attached Reports</h3>
-                    <button
-                        type="button"
-                        onClick={() => setIsReportModalOpen(true)}
-                        className="flex items-center bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0A0F56] transition font-semibold shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
-                    >
-                        <FiPaperclip className="mr-2" /> Attach New Report
-                    </button>
+                  <h3 className="text-lg font-semibold text-[#232360]">Attached Reports</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsReportModalOpen(true)}
+                    className="flex items-center bg-[#2563EB] text-white px-4 py-2 rounded-lg text-sm hover:bg-[#0A0F56] transition font-semibold shadow focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                  >
+                    <FiPaperclip className="mr-2" /> Attach New Report
+                  </button>
                 </div>
                 {attachedReports.length > 0 ? (
-                    <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
-                        {attachedReports.map((report, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
-                                    <p className="text-xs text-gray-500 truncate">{report.result}</p>
-                                </div>
-                                <div className="flex items-center space-x-2 ml-2">
-                                    {report.image && (
-                                        <button 
-                                            onClick={() => handlePreviewReportImage(report)} 
-                                            className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                                            title="Preview Image"
-                                        >
-                                            <FiEye size={18} />
-                                        </button>
-                                    )}
-                                    <button 
-                                        onClick={() => handleRemoveReport(index)} 
-                                        className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
-                                        title="Remove Report"
-                                    >
-                                        <FiTrash2 size={18} />
-                                    </button>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                  <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                    {attachedReports.map((report, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
+                          <p className="text-xs text-gray-500 truncate">{report.result}</p>
+                        </div>
+                        <div className="flex items-center space-x-2 ml-2">
+                          {report.image && (
+                            <button
+                              onClick={() => handlePreviewReportImage(report)}
+                              className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                              title="Preview Image"
+                            >
+                              <FiEye size={18} />
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleRemoveReport(index)}
+                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                            title="Remove Report"
+                          >
+                            <FiTrash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 ) : (
-                    <p className="text-sm text-gray-500 text-center py-4 bg-white rounded-lg border border-gray-200 shadow-sm">No reports attached yet.</p>
+                  <p className="text-sm text-gray-500 text-center py-4 bg-white rounded-lg border border-gray-200 shadow-sm">No reports attached yet.</p>
                 )}
               </div>
 
