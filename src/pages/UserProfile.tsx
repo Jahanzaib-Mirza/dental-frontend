@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAppSelector } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 
