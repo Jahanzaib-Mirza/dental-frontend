@@ -44,7 +44,7 @@ export const getProfile = createAsyncThunk(
 
 export const logoutUser = createAsyncThunk(
   'auth/logout',
-  async (_, { rejectWithValue }) => {
+  async (_, {}) => {
     try {
       await authService.logout();
       
@@ -118,7 +118,7 @@ const authSlice = createSlice({
         state.user = null;
         state.error = null;
       })
-      .addCase(logoutUser.rejected, (state, action) => {
+      .addCase(logoutUser.rejected, (state) => {
         // Even if logout API fails, clear the auth state
         state.isLoading = false;
         state.isAuthenticated = false;

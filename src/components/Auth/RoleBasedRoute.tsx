@@ -1,7 +1,7 @@
 import { Navigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../../lib/store/store';
-import { hasRouteAccess, getRedirectPath } from '../../lib/utils/rolePermissions';
+import { getRedirectPath } from '../../lib/utils/rolePermissions';
 import type { UserRole } from '../../lib/utils/rolePermissions';
 
 interface RoleBasedRouteProps {
