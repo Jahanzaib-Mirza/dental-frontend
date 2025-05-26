@@ -357,26 +357,6 @@ const AppointmentDetails = () => {
                 )}
               </div>
 
-              {/* File Upload */}
-              <div className="bg-[#F7F8FA] border-2 border-dashed border-[#2563EB] rounded-lg p-8 text-center flex flex-col items-center transition-shadow hover:shadow-lg">
-                <FiUpload className="text-3xl text-[#2563EB] mb-2" />
-                <p className="text-base text-[#232360] mb-1 font-semibold">
-                  <span className="text-[#2563EB] font-bold cursor-pointer">Click to upload</span> or drag and drop
-                </p>
-                <p className="text-xs text-gray-400 mb-2">SVG, PNG, JPG or GIF (max. 800x400px)</p>
-                <input
-                  type="file"
-                  onChange={handleFileUpload}
-                  className="hidden"
-                  id="file-upload"
-                />
-                <label
-                  htmlFor="file-upload"
-                  className="mt-2 inline-block cursor-pointer text-[#2563EB] text-sm font-semibold"
-                >
-                  Browse Files
-                </label>
-              </div>
               {/* File Progress */}
               {selectedFile && (
                 <div className="mt-4 bg-[#F7F8FA] rounded-lg p-4 border border-[#2563EB]">
