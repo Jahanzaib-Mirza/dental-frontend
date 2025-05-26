@@ -143,7 +143,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
     newPassword: '',
     confirmPassword: '',
   });
-  const [showPasswords, setShowPasswords] = useState({
+  const [showPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
