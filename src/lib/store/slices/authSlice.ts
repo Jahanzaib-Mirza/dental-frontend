@@ -47,9 +47,20 @@ export const logoutUser = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       await authService.logout();
+      
+      // Clear any localStorage/sessionStorage data
+      localStorage.clear();
+      sessionStorage.clear();
+      
     } catch (error: any) {
       console.error('Backend logout API call failed:', error);
-      return rejectWithValue(error.response?.data?.message || 'Logout API call failed');
+      
+      // Even if the API call fails, clear local storage and proceed with logout
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Don't reject the promise - we still want to clear the Redux state
+      // return rejectWithValue(error.response?.data?.message || 'Logout API call failed');
     }
   }
 );
@@ -108,10 +119,11 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(logoutUser.rejected, (state, action) => {
+        // Even if logout API fails, clear the auth state
         state.isLoading = false;
         state.isAuthenticated = false;
         state.user = null;
-        state.error = action.payload as string;
+        state.error = null; // Don't show error for logout failures
       });
   },
 });

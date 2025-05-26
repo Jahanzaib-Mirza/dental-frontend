@@ -12,6 +12,7 @@ import { type Appointment } from "../lib/api/services/appointments";
 import type { RootState } from "../lib/store/store";
 import type { User } from "../lib/api/services/users";
 
+
 const AppointmentList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -23,6 +24,11 @@ const AppointmentList = () => {
 
   const { appointments, isLoading, error } = useAppSelector((state: RootState) => state.appointments);
   const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
+  const user = useAppSelector((state: RootState) => state.auth.user);
+  
+  // Get user role directly from Redux state to avoid function dependency issues
+  const userRole = user?.role;
+  const isDoctorRole = userRole === 'doctor';
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -45,12 +51,16 @@ const AppointmentList = () => {
       .catch((error) => {
         toast.error(error || 'Failed to fetch appointments');
       });
-    dispatch(fetchDoctors())
-      .unwrap()
-      .catch((error) => {
-        toast.error(error || 'Failed to fetch doctors');
-      });
-  }, [dispatch]);
+    
+    // Only fetch doctors if user is not a doctor (doctors can't see other doctors)
+    if (!isDoctorRole) {
+      dispatch(fetchDoctors())
+        .unwrap()
+        .catch((error) => {
+          toast.error(error || 'Failed to fetch doctors');
+        });
+    }
+  }, [dispatch, isDoctorRole]);
 
   const filteredAppointments = useMemo(() => {
     return appointments
@@ -124,7 +134,7 @@ const AppointmentList = () => {
 
       {/* Filters and Search Section */}
       <div className="mb-6 p-4 bg-white rounded-lg shadow">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div className={`grid grid-cols-1 gap-4 items-end ${isDoctorRole ? 'md:grid-cols-2' : 'md:grid-cols-3'}`}>
           {/* Search Input */}
           <div className="relative">
             <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
@@ -145,26 +155,28 @@ const AppointmentList = () => {
             </div>
           </div>
 
-          {/* Doctor Filter */}
-          <div>
-            <label htmlFor="doctorFilter" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-              <FaFilter className="text-[#0A0F56] mr-2" /> Doctor
-            </label>
-            <Select
-              id="doctorFilter"
-              options={[{ value: '', label: 'All Doctors' }, ...doctors.map((d: User) => ({ value: d.id, label: d.name }))]}
-              value={doctors.find((d: User) => d.id === selectedDoctorId) ?
-                { value: selectedDoctorId, label: doctors.find((d: User) => d.id === selectedDoctorId)?.name || '' } :
-                { value: '', label: 'All Doctors' }
-              }
-              onChange={(selectedOption) => setSelectedDoctorId(selectedOption ? selectedOption.value : null)}
-              isClearable
-              placeholder="Select Doctor"
-              isLoading={isLoadingDoctors}
-              className="text-sm"
-              styles={{ control: (base) => ({ ...base, minHeight: '42px', borderColor: '#D1D5DB' }), menu: base => ({ ...base, zIndex: 20 }) }}
-            />
-          </div>
+          {/* Doctor Filter - Only show for non-doctors */}
+          {!isDoctorRole && (
+            <div>
+              <label htmlFor="doctorFilter" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaFilter className="text-[#0A0F56] mr-2" /> Doctor
+              </label>
+              <Select
+                id="doctorFilter"
+                options={[{ value: '', label: 'All Doctors' }, ...doctors.map((d: User) => ({ value: d.id, label: d.name }))]}
+                value={doctors.find((d: User) => d.id === selectedDoctorId) ?
+                  { value: selectedDoctorId, label: doctors.find((d: User) => d.id === selectedDoctorId)?.name || '' } :
+                  { value: '', label: 'All Doctors' }
+                }
+                onChange={(selectedOption) => setSelectedDoctorId(selectedOption ? selectedOption.value : null)}
+                isClearable
+                placeholder="Select Doctor"
+                isLoading={isLoadingDoctors}
+                className="text-sm"
+                styles={{ control: (base) => ({ ...base, minHeight: '42px', borderColor: '#D1D5DB' }), menu: base => ({ ...base, zIndex: 20 }) }}
+              />
+            </div>
+          )}
 
           {/* Status Filter */}
           <div>

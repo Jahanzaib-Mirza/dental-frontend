@@ -15,6 +15,7 @@ import type { User } from '../lib/api/services/users';
 import { appointmentService } from '../lib/api/services/appointments';
 
 
+
 const AddAppointment = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -25,6 +26,11 @@ const AddAppointment = () => {
   const { isCreating, createError } = useAppSelector((state: RootState) => state.appointments);
   const { patients } = useAppSelector((state: RootState) => state.patients);
   const { doctors } = useAppSelector((state: RootState) => state.doctors);
+  const user = useAppSelector((state: RootState) => state.auth.user);
+  
+  // Get user role directly from Redux state to avoid function dependency issues
+  const userRole = user?.role;
+  const isDoctorRole = userRole === 'doctor';
 
   const [formData, setFormData] = useState({
     patientId: '',
@@ -42,12 +48,15 @@ const AddAppointment = () => {
         toast.error(error || 'Failed to fetch patients');
       });
 
-    dispatch(fetchDoctors())
-      .unwrap()
-      .catch((error) => {
-        toast.error(error || 'Failed to fetch doctors');
-      });
-  }, [dispatch]);
+    // Only fetch doctors if user is not a doctor
+    if (!isDoctorRole) {
+      dispatch(fetchDoctors())
+        .unwrap()
+        .catch((error) => {
+          toast.error(error || 'Failed to fetch doctors');
+        });
+    }
+  }, [dispatch, isDoctorRole]);
 
   useEffect(() => {
     const fetchSlots = async () => {

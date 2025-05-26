@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { LoginForm } from '../features/auth/components/LoginForm';
 import { ProtectedRoute } from '../features/auth/components/ProtectedRoute';
+import { RoleBasedRoute } from '../components/Auth/RoleBasedRoute';
 import DoctorAppointment from '../pages/DoctorAppointment';
 import { DashboardLayout } from '../layouts/DashboardLayout';
 import AppointmentTable from '../pages/AppointmentList';
@@ -12,10 +13,9 @@ import AppointmentDetails from '../pages/AppointmentDetails';
 import Expense from '../pages/Expense';
 import Invoice from '../pages/Invoice';
 import UserProfile from '../pages/UserProfile';
+import Dashboard from '../pages/Dashboard';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../lib/store/store';
-
-// Define UserRole type to fix type errors
 
 
 // Create a wrapper component to provide user from Redux
@@ -46,9 +46,11 @@ export const router = createBrowserRouter([
     path: '/dashboard',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <div>Dashboard Content</div>
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <Dashboard />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -56,9 +58,11 @@ export const router = createBrowserRouter([
     path: '/doctors',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <DoctorAppointment />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist']}>
+          <DashboardWrapper>
+            <DoctorAppointment />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -66,9 +70,11 @@ export const router = createBrowserRouter([
     path: '/appointments',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <AppointmentTable />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <AppointmentTable />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -76,9 +82,11 @@ export const router = createBrowserRouter([
     path: '/patients',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <PatientList />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <PatientList />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -86,9 +94,11 @@ export const router = createBrowserRouter([
     path: '/services',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <Services />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist']}>
+          <DashboardWrapper>
+            <Services />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -96,9 +106,11 @@ export const router = createBrowserRouter([
     path: '/add-appointment',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <AddAppointment />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist']}>
+          <DashboardWrapper>
+            <AddAppointment />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -106,9 +118,11 @@ export const router = createBrowserRouter([
     path: '/patient-profile',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <PatientProfile />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <PatientProfile />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -116,9 +130,11 @@ export const router = createBrowserRouter([
     path: '/appointment-details',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <AppointmentDetails />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'doctor']} redirectPath="/appointments">
+          <DashboardWrapper>
+            <AppointmentDetails />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -126,9 +142,11 @@ export const router = createBrowserRouter([
     path: '/expense',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <Expense />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist']}>
+          <DashboardWrapper>
+            <Expense />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -136,9 +154,11 @@ export const router = createBrowserRouter([
     path: '/invoice',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <Invoice />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist']}>
+          <DashboardWrapper>
+            <Invoice />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },
@@ -146,9 +166,11 @@ export const router = createBrowserRouter([
     path: '/account',
     element: (
       <ProtectedRoute>
-        <DashboardWrapper>
-          <UserProfile />
-        </DashboardWrapper>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <UserProfile />
+          </DashboardWrapper>
+        </RoleBasedRoute>
       </ProtectedRoute>
     ),
   },

@@ -1,153 +1,96 @@
 import { Service } from '../components/Service/ServiceCard';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import { AddServiceModal } from '../components/Service/AddServiceModal';
 import type { ServiceFormData } from '../components/Service/AddServiceModal';
-
-const services = [
-  {
-    id: 1,
-    title: "General Dentistry",
-    description: "Comprehensive dental care including cleanings, fillings, and preventive treatments.",
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop",
-    price: "From $75",
-    features: ["Check-ups", "Cleaning", "Fillings", "X-Rays"]
-  },
-  {
-    id: 2,
-    title: "Cosmetic Dentistry",
-    description: "Transform your smile with teeth whitening, veneers, and smile makeovers.",
-    image: "https://images.unsplash.com/photo-1606811841689-23dfddce3e95?q=80&w=1000&auto=format&fit=crop",
-    price: "From $299",
-    features: ["Whitening", "Veneers", "Bonding", "Design"]
-  },
-  {
-    id: 3,
-    title: "Orthodontics",
-    description: "Straighten your teeth and correct bite issues with modern treatments.",
-    image: "https://images.unsplash.com/photo-1598256989800-fe5f95da9787?q=80&w=1000&auto=format&fit=crop",
-    price: "From $2,500",
-    features: ["Braces", "Aligners", "Retainers", "Care"]
-  },
-  {
-    id: 4,
-    title: "Dental Implants",
-    description: "Replace missing teeth with permanent, natural-looking dental implants.",
-    image: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=1000&auto=format&fit=crop",
-    price: "From $3,000",
-    features: ["Implants", "Bridges", "3D Plan", "Support"]
-  },
-  {
-    id: 5,
-    title: "Emergency Care",
-    description: "24/7 emergency dental services for immediate relief and urgent care.",
-    image: "https://images.unsplash.com/photo-1629909613654-28e377c37b09?q=80&w=1000&auto=format&fit=crop",
-    price: "From $150",
-    features: ["24/7 Care", "Relief", "Repairs", "Support"]
-  },
-  {
-    id: 6,
-    title: "Pediatric Care",
-    description: "Specialized dental care for children in a friendly environment.",
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop",
-    price: "From $85",
-    features: ["Kid Care", "Prevention", "Fluoride", "Sealants"]
-  },
-  {
-    id: 7,
-    title: "Root Canal",
-    description: "Advanced endodontic treatment to save damaged or infected teeth.",
-    image: "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?q=80&w=1000&auto=format&fit=crop",
-    price: "From $800",
-    features: ["Treatment", "Cleaning", "Filling", "Recovery"]
-  },
-  {
-    id: 8,
-    title: "Teeth Grinding",
-    description: "Solutions for bruxism including night guards and TMJ treatment.",
-    image: "https://images.unsplash.com/photo-1600170311833-c2cf5280ce49?q=80&w=1000&auto=format&fit=crop",
-    price: "From $250",
-    features: ["Guards", "TMJ Care", "Relief", "Prevention"]
-  },
-  {
-    id: 9,
-    title: "Laser Dentistry",
-    description: "Modern laser treatments for precise and comfortable dental procedures.",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=1000&auto=format&fit=crop",
-    price: "From $400",
-    features: ["Precision", "Comfort", "Fast Care", "Modern"]
-  },
-  {
-    id: 10,
-    title: "Gum Treatment",
-    description: "Periodontal care for healthy gums and overall oral health.",
-    image: "https://images.unsplash.com/photo-1571772996211-2f02c9727629?q=80&w=1000&auto=format&fit=crop",
-    price: "From $200",
-    features: ["Deep Clean", "Surgery", "Scaling", "Maintenance"]
-  },
-  {
-    id: 11,
-    title: "Sedation",
-    description: "Comfortable dental care with various sedation options available.",
-    image: "https://images.unsplash.com/photo-1616391182219-e080b4d1043a?q=80&w=1000&auto=format&fit=crop",
-    price: "From $350",
-    features: ["Comfort", "Monitoring", "Safe Care", "Recovery"]
-  },
-  {
-    id: 12,
-    title: "Digital Scanning",
-    description: "Advanced 3D digital impressions for precise dental work.",
-    image: "https://images.unsplash.com/photo-1609840114035-3c981b782dfe?q=80&w=1000&auto=format&fit=crop",
-    price: "From $175",
-    features: ["3D Scan", "Precision", "No Molds", "Quick"]
-  },
-  {
-    id: 13,
-    title: "Smile Design",
-    description: "Custom smile makeover planning using digital technology.",
-    image: "https://images.unsplash.com/photo-1581524729797-1bd56c3c0607?q=80&w=1000&auto=format&fit=crop",
-    price: "From $500",
-    features: ["Planning", "Preview", "Custom", "Perfect"]
-  },
-  {
-    id: 14,
-    title: "Sleep Apnea",
-    description: "Dental solutions for sleep apnea and snoring problems.",
-    image: "https://images.unsplash.com/photo-1617575521317-d2974f3b56d2?q=80&w=1000&auto=format&fit=crop",
-    price: "From $950",
-    features: ["Diagnosis", "Device", "Follow-up", "Relief"]
-  },
-  {
-    id: 15,
-    title: "Sports Guards",
-    description: "Custom-fitted mouth guards for athletes and sports protection.",
-    image: "https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&w=1000&auto=format&fit=crop",
-    price: "From $125",
-    features: ["Custom Fit", "Comfort", "Protection", "Durable"]
-  }
-];
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { fetchServices, createService, updateService, deleteService } from '../lib/store/slices/servicesSlice';
+import { toast } from 'react-hot-toast';
+import type { RootState } from '../lib/store/store';
+import type { Service as ServiceType } from '../lib/api/services/services';
 
 export default function Services() {
+  const dispatch = useAppDispatch();
+  const { services, isLoading, error, isCreating, createError, isUpdating, updateError, isDeleting, deleteError } = useAppSelector((state: RootState) => state.services);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [serviceList, setServiceList] = useState(services);
+  const [editingService, setEditingService] = useState<ServiceType | null>(null);
+
+  useEffect(() => {
+    dispatch(fetchServices());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+    if (createError) {
+      toast.error(createError);
+    }
+    if (updateError) {
+      toast.error(updateError);
+    }
+    if (deleteError) {
+      toast.error(deleteError);
+    }
+  }, [error, createError, updateError, deleteError]);
 
   const handleAddButtonClick = () => {
+    setEditingService(null);
     setIsAddModalOpen(true);
   };
 
-  const handleAddServiceSubmit = (serviceData: ServiceFormData) => {
-    const newService = {
-      id: serviceList.length + 1,
-      title: serviceData.name,
-      description: serviceData.description,
-      image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1000&auto=format&fit=crop",
-      price: serviceData.price,
-      features: serviceData.features
-    };
-
-    // Add the new service to the list
-    setServiceList([...serviceList, newService]);
+  const handleEditService = (service: ServiceType) => {
+    setEditingService(service);
+    setIsAddModalOpen(true);
   };
+
+  const handleServiceSubmit = async (serviceData: ServiceFormData) => {
+    try {
+      if (editingService) {
+        await dispatch(updateService({
+          id: editingService.id,
+          serviceData: {
+            name: serviceData.name,
+            price: parseFloat(serviceData.price.replace(/[^0-9.]/g, '')),
+            description: serviceData.description,
+            features: serviceData.features.filter(f => f.trim() !== '')
+          }
+        })).unwrap();
+        toast.success('Service updated successfully');
+      } else {
+        await dispatch(createService({
+          name: serviceData.name,
+          price: parseFloat(serviceData.price.replace(/[^0-9.]/g, '')),
+          description: serviceData.description,
+          features: serviceData.features.filter(f => f.trim() !== '')
+        })).unwrap();
+        toast.success('Service created successfully');
+      }
+      setIsAddModalOpen(false);
+      setEditingService(null);
+    } catch (error) {
+      // Error is handled by the Redux slice
+    }
+  };
+
+  const handleDeleteService = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this service?')) {
+      try {
+        await dispatch(deleteService(id)).unwrap();
+        toast.success('Service deleted successfully');
+      } catch (error) {
+        // Error is handled by the Redux slice
+      }
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#0A0F56]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen">
@@ -162,7 +105,8 @@ export default function Services() {
         <div className="flex items-center space-x-3">
           <button
             onClick={handleAddButtonClick}
-            className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            disabled={isCreating || isUpdating}
+            className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FaPlus className="mr-2 text-base" />
             Add Service
@@ -173,24 +117,33 @@ export default function Services() {
       {/* Services List */}
       <div className="container mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {serviceList.map((service) => (
+          {services.map((service) => (
             <Service
               key={service.id}
-              title={service.title}
+              id={service.id}
+              title={service.name}
               description={service.description}
-              price={service.price}
+              price={`$${service.price}`}
               features={service.features}
-              image={service.image}
+              onDelete={() => handleDeleteService(service.id)}
+              onEdit={handleEditService}
+              isDeleting={isDeleting}
             />
           ))}
         </div>
       </div>
 
-      {/* Add Service Modal */}
+      {/* Add/Edit Service Modal */}
       <AddServiceModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddServiceSubmit}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingService(null);
+        }}
+        onSubmit={handleServiceSubmit}
+        isSubmitting={isCreating || isUpdating}
+        mode={editingService ? 'update' : 'create'}
+        service={editingService || undefined}
       />
     </div>
   );
