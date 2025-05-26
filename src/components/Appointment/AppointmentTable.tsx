@@ -1,20 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { Appointment } from '../../lib/api/services/appointments';
+import { calculateAge } from '../../lib/utils/dateUtils';
+import { getInitials } from '../../lib/utils/stringUtils';
+import InitialAvatar from '../Common/InitialAvatar';
 
 interface AppointmentTableProps {
-  appointments: Array<{
-    name: string;
-    username: string;
-    id: string;
-    date: string;
-    sex: string;
-    age: number;
-    disease: string;
-    status: string;
-    doctor: string;
-    image: string;
-    time: string;
-  }>;
+  appointments: Appointment[];
 }
 
 export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments }) => {
@@ -51,33 +43,41 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
               onClick={() => navigate('/appointment-details', { state: { appointment } })}
             >
               <td className="flex items-center space-x-2 p-2">
-                <img
-                  src={appointment.image}
-                  alt="profile"
-                  className="w-6 h-6 rounded-full"
+                <InitialAvatar 
+                  initials={getInitials(appointment.patient?.name || '')} 
+                  size={8}
+                  bgColor="bg-blue-500"
+                  textColor="text-white"
+                  className="border-none shadow-none text-xs"
                 />
                 <div>
-                  <p className="font-sm">{appointment.name}</p>
-                  <p className="text-gray-500 text-xxs">{appointment.username}</p>
+                  <p className="font-sm">{appointment.patient?.name || 'N/A'}</p>
+                  <p className="text-gray-500 text-xxs">{appointment.patient?.email || 'N/A'}</p>
                 </div>
               </td>
-              <td className="p-2">{appointment.date}</td>
-              <td className="p-2">{appointment.time}</td>
-              <td className="p-2">{appointment.sex}</td>
-              <td className="p-2">{appointment.age}</td>
-              <td className="p-2">{appointment.disease}</td>
+              <td className="p-2">{new Date(appointment.date).toLocaleDateString()}</td>
+              <td className="p-2">{appointment.time || 'N/A'}</td>
+              <td className="p-2">{appointment.patient?.gender || 'N/A'}</td>
+              <td className="p-2">{appointment.patient?.dob ? calculateAge(appointment.patient.dob) : 'N/A'}</td>
+              <td className="p-2">{appointment.reason || 'N/A'}</td>
               <td className="p-2">
                 <span
                   className={`px-2 py-1 text-xxs rounded-full ${
-                    appointment.status === "Complete"
+                    appointment.status === "completed"
                       ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
+                      : appointment.status === "pending"
+                      ? "bg-yellow-100 text-yellow-700"
+                      : appointment.status === "confirmed"
+                      ? "bg-blue-100 text-blue-700"
+                      : appointment.status === "cancelled"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-gray-100 text-gray-700"
                   }`}
                 >
-                  {appointment.status}
+                  {appointment.status || 'N/A'}
                 </span>
               </td>
-              <td className="p-2">{appointment.doctor}</td>
+              <td className="p-2">{appointment.doctor?.name || 'N/A'}</td>
               <td className="p-2 flex space-x-2">
                 <button 
                   className="text-gray-400 hover:text-blue-500 text-xxs"

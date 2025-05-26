@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EditDoctorModal } from './EditDoctorModal';
 import type { User } from '../../lib/api/services/users';
+import InitialAvatar from '../Common/InitialAvatar';
+import { getInitials } from '../../lib/utils/stringUtils';
 
 interface DoctorCardProps {
   doctor: User;
@@ -20,11 +22,21 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
   return (
     <>
       <div className="flex items-center bg-white rounded-lg shadow-sm p-3 mb-3">
-        <img 
-          src={doctor.profileImage || `https://randomuser.me/api/portraits/${doctor.gender === 'male' ? 'men' : 'women'}/1.jpg`} 
-          alt={doctor.name} 
-          className="w-16 h-16 rounded-full mr-5" 
-        />
+        {doctor.profileImage ? (
+          <img 
+            src={doctor.profileImage}
+            alt={doctor.name} 
+            className="w-16 h-16 rounded-full mr-5 object-cover"
+          />
+        ) : (
+          <InitialAvatar 
+            initials={getInitials(doctor.name || '')} 
+            size={16}
+            bgColor="bg-indigo-500"
+            textColor="text-white"
+            className="mr-5 text-xl"
+          />
+        )}
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div>
