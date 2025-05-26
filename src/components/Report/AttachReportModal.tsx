@@ -53,7 +53,7 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-md z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 ease-out scale-95 hover:scale-100">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-bold text-[#0A0F56] flex items-center">
@@ -73,7 +73,7 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
               value={testName}
               onChange={(e) => setTestName(e.target.value)}
               placeholder="e.g., Blood Sugar Test"
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition-shadow shadow-sm"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
               required
             />
           </div>
@@ -86,23 +86,24 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
               onChange={(e) => setResult(e.target.value)}
               placeholder="Enter test results or findings..."
               rows={4}
-              className="w-full border border-gray-300 rounded-lg p-3 text-sm resize-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB] transition-shadow shadow-sm"
+              className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Upload Image (Optional)</label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#2563EB] transition-colors bg-gray-50">
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Image (Optional)</label>
+            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#0A0F56] transition-colors bg-gray-50">
               <div className="space-y-1 text-center">
                 {imagePreview ? (
-                  <div className='relative group'>
+                  <div className="relative group">
                     <img src={imagePreview} alt="Report preview" className="mx-auto h-32 w-auto rounded-md object-contain" />
                     <button 
-                        onClick={() => { setReportImage(null); setImagePreview(null); const fileInput = document.getElementById('report-image-upload') as HTMLInputElement; if(fileInput) fileInput.value = ''; }}
-                        className='absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity'
+                      type="button"
+                      onClick={() => { setReportImage(null); setImagePreview(null); const fileInput = document.getElementById('report-image-upload') as HTMLInputElement; if(fileInput) fileInput.value = ''; }}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                        <FiX size={14}/>
+                      <FiX size={14}/>
                     </button>
                   </div>
                 ) : (
@@ -111,7 +112,7 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
                 <div className="flex text-sm text-gray-600">
                   <label
                     htmlFor="report-image-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-[#2563EB] hover:text-[#0A0F56] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#2563EB] px-1"
+                    className="relative cursor-pointer font-semibold text-[#0A0F56] hover:text-[#232a7c] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#0A0F56] px-1"
                   >
                     <span>Upload a file</span>
                     <input id="report-image-upload" name="report-image-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
@@ -136,7 +137,7 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#0A0F56] hover:bg-[#2563EB] rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56] shadow-md hover:shadow-lg"
+              className="px-6 py-2.5 text-sm font-semibold text-white bg-[#0A0F56] hover:bg-[#232a7c] rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56] shadow-md hover:shadow-lg"
             >
               Attach Report
             </button>
