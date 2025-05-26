@@ -1,5 +1,5 @@
 import  { useState, useEffect, useMemo } from "react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Select from 'react-select';
 import { FaPlus, FaFilter, FaSearch } from "react-icons/fa";
 import { AppointmentTable } from "../components/Appointment/AppointmentTable";
@@ -11,11 +11,11 @@ import { toast } from "react-hot-toast";
 import { type Appointment } from "../lib/api/services/appointments";
 import type { RootState } from "../lib/store/store";
 import type { User } from "../lib/api/services/users";
-import { calculateAge } from "../lib/utils/dateUtils";
 
 const AppointmentList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
@@ -23,6 +23,14 @@ const AppointmentList = () => {
 
   const { appointments, isLoading, error } = useAppSelector((state: RootState) => state.appointments);
   const { doctors, isLoading: isLoadingDoctors } = useAppSelector((state: RootState) => state.doctors);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const doctorIdFromParams = queryParams.get('doctorId');
+    if (doctorIdFromParams) {
+      setSelectedDoctorId(doctorIdFromParams);
+    }
+  }, [location.search]);
 
   const appointmentStatusOptions = [
     { value: "pending", label: "Pending" },
@@ -67,21 +75,6 @@ const AppointmentList = () => {
         return true;
       });
   }, [appointments, searchTerm, selectedDoctorId, selectedStatus]);
-
-  // Transform API data to match table format
-  const transformedAppointments = filteredAppointments.map((appointment: Appointment) => ({
-    name: appointment.patient?.name || 'N/A',
-    username: appointment.patient?.email || 'N/A',
-    id: appointment.id,
-    date: new Date(appointment.date).toLocaleDateString(),
-    time: appointment.time,
-    sex: appointment.patient?.gender || 'N/A',
-    age: appointment.patient?.dob ? calculateAge(appointment.patient.dob) : 0,
-    disease: appointment.reason,
-    status: appointment.status,
-    doctor: appointment.doctor?.name || 'N/A',
-    image: 'https://i.pravatar.cc/40?img=1',
-  }));
 
   if (isLoading) {
     return (
@@ -192,7 +185,7 @@ const AppointmentList = () => {
         </div>
       </div>
 
-      <AppointmentTable appointments={transformedAppointments} />
+      <AppointmentTable appointments={filteredAppointments} />
 
       <Pagination
         currentPage={currentPage}
