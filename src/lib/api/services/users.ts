@@ -15,6 +15,7 @@ export interface User {
   licenseDocumentUrl?: string;
   experience?: number;
   education?: string;
+  createdAt?: number;
   availability?: any[];
   status: 'active' | 'inactive' | 'suspended';
   organization: {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { FiX, FiUser, FiCalendar, FiMapPin } from 'react-icons/fi';
+import  { useState } from 'react';
+import { FiX, FiUser, FiCalendar } from 'react-icons/fi';
 
 interface Invoice {
   id: string;
