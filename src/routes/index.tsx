@@ -11,6 +11,7 @@ import Services from '../pages/Services';
 import AppointmentDetails from '../pages/AppointmentDetails';
 import Expense from '../pages/Expense';
 import Invoice from '../pages/Invoice';
+import UserProfile from '../pages/UserProfile';
 import { useSelector } from 'react-redux';
 import type { RootState } from '../lib/store/store';
 
@@ -137,6 +138,16 @@ export const router = createBrowserRouter([
       <ProtectedRoute>
         <DashboardWrapper>
           <Invoice />
+        </DashboardWrapper>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/account',
+    element: (
+      <ProtectedRoute>
+        <DashboardWrapper>
+          <UserProfile />
         </DashboardWrapper>
       </ProtectedRoute>
     ),
