@@ -1,69 +1,106 @@
-import { useState } from 'react';
-import { FiSearch, FiFilter } from 'react-icons/fi';
-
-interface Invoice {
-  id: string;
-  inspectionId: string;
-  client: string;
-  address: string;
-  serviceName: string;
-  serviceProvider: string;
-  created: string;
-  amount: number;
-  status: 'Unsent' | 'Due' | 'Past Due' | 'Paid';
-}
+import { useState, useEffect } from 'react';
+import { FiSearch, FiFilter, FiCheck, FiLoader } from 'react-icons/fi';
+import { useAppSelector, useAppDispatch } from '../lib/hooks';
+import type { RootState } from '../lib/store/store';
+import { fetchInvoices, markInvoiceAsPaid } from '../lib/store/slices/invoicesSlice';
+import type { Invoice } from '../lib/api/services/invoices';
+import toast from 'react-hot-toast';
 
 export default function Invoice() {
+  const dispatch = useAppDispatch();
+  const { invoices, isLoading, error, isMarkingPaid } = useAppSelector((state: RootState) => state.invoices);
   const [searchTerm, setSearchTerm] = useState('');
-  const [invoices] = useState<Invoice[]>([
-    {
-      id: '#000812',
-      inspectionId: 'INS-0000002878',
-      client: 'gongu gulbai',
-      address: 'Biryani City, North Bethesda, Maryland, 20852',
-      serviceName: 'Service Name',
-      serviceProvider: 'Muhammad Jahanzaib',
-      created: '05/13/2025',
-      amount: 868.00,
-      status: 'Past Due'
-    },
-    {
-      id: '#000815',
-      inspectionId: 'INS-0000002881',
-      client: 'jalebi bai',
-      address: 'Ladue Horton Watkins High School, St. Louis, Missouri, 63124',
-      serviceName: 'Service Name',
-      serviceProvider: 'Muhammad Jahanzaib',
-      created: '05/14/2025',
-      amount: 768.00,
-      status: 'Past Due'
-    }
-  ]);
 
-  const stats = [
-    { label: 'Total Invoices', count: 13, amount: '$10684.00', bgColor: 'bg-blue-50' },
-    // { label: 'Unsent', count: 0, amount: '$0.00', bgColor: 'bg-gray-50' },
-    { label: 'Due', count: 0, amount: '$0.00', bgColor: 'bg-orange-50' },
-    // { label: 'Past Due', count: 13, amount: '$10684.00', bgColor: 'bg-red-50' },
-    { label: 'Paid', count: 0, amount: '$0.00', bgColor: 'bg-green-50' }
-  ];
+  useEffect(() => {
+    dispatch(fetchInvoices());
+  }, [dispatch]);
+
+    // Calculate stats from real data
+  const calculateStats = () => {
+    const totalCount = invoices.length;
+    const totalAmount = invoices.reduce((sum, invoice) => sum + invoice.total, 0);
+    
+    const dueInvoices = invoices.filter(inv => inv.status === 'due');
+    const dueCount = dueInvoices.length;
+    const dueAmount = dueInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+    
+    const paidInvoices = invoices.filter(inv => inv.status === 'paid');
+    const paidCount = paidInvoices.length;
+    const paidAmount = paidInvoices.reduce((sum, invoice) => sum + invoice.total, 0);
+
+    return [
+      { label: 'Total Invoices', count: totalCount, amount: `$${totalAmount.toFixed(2)}`, bgColor: 'bg-blue-50' },
+      { label: 'Due', count: dueCount, amount: `$${dueAmount.toFixed(2)}`, bgColor: 'bg-orange-50' },
+      { label: 'Paid', count: paidCount, amount: `$${paidAmount.toFixed(2)}`, bgColor: 'bg-green-50' }
+    ];
+  };
+
+  const stats = calculateStats();
+
+  const handleMarkAsPaid = async (invoiceId: string) => {
+    try {
+      await dispatch(markInvoiceAsPaid(invoiceId)).unwrap();
+      toast.success('Invoice marked as paid successfully!');
+    } catch (err) {
+      toast.error(err as string || 'Failed to mark invoice as paid');
+    }
+  };
+
+  // Filter invoices based on search term
+  const filteredInvoices = invoices.filter(invoice =>
+    invoice?.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice?.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice?.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'Past Due':
+    switch (status?.toLowerCase()) {
+      case 'overdue':
         return 'bg-red-100 text-red-800';
-      case 'Due':
+      case 'due':
         return 'bg-orange-100 text-orange-800';
-      case 'Paid':
+      case 'paid':
         return 'bg-green-100 text-green-800';
+      case 'unsent':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
+  const formatDate = (timestamp: number | undefined) => {
+    try {
+      if (!timestamp) return 'N/A';
+      return new Date(timestamp).toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric'
+      });
+    } catch {
+      return 'N/A';
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="bg-gradient-to-br min-h-screen from-[#f4f6fb] to-[#e9eaf7] flex flex-col items-center justify-center p-4">
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 text-center">
+          <h3 className="text-xl font-semibold text-red-600 mb-2">Error Loading Invoices</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => dispatch(fetchInvoices())}
+            className="bg-[#0A0F56] text-white px-4 py-2 rounded-lg hover:bg-[#090D45]"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-gradient-to-br min-h-screen from-[#f4f6fb] to-[#e9eaf7] flex flex-col items-center p-4">
-      <div className="flex flex-col mb-6">
+      <div className="w-full max-w-7xl mx-auto">
         {/* Stats Grid */}
         <div className="flex flex-wrap justify-center gap-2 mb-8 ">
           {stats.map((stat, index) => (
@@ -83,79 +120,117 @@ export default function Invoice() {
         </div>
 
         {/* Filters and Search */}
-        <div className="flex sm:flex-row justify-end mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between items-center mb-6 gap-4">
+          <button
+            onClick={() => dispatch(fetchInvoices())}
+            disabled={isLoading}
+            className="flex items-center bg-gray-100 text-gray-700 text-sm rounded-lg px-4 py-2 hover:bg-gray-200 shadow disabled:opacity-50 w-full sm:w-auto"
+          >
+            {isLoading ? (
+              <FiLoader className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            )}
+            Refresh
+          </button>
           
-          <div className="flex items-center space-x-4 sm:w-auto">
-            <div className="relative sm:flex-initial">
+          <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+            <div className="relative w-full sm:flex-initial">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="Search..."
-                className="sm:w-64 pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white shadow"
+                placeholder="Search invoices..."
+                className="w-full sm:w-64 pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-white shadow"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="flex items-center bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow">
+            <button className="flex items-center justify-center bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow w-full sm:w-auto">
               <span>All</span>
-              <FiFilter className="w-4 h-4" />
+              <FiFilter className="w-4 h-4 ml-2" />
             </button>
           </div>
         </div>
 
-        {/* Invoice Table */}
-        <div className="bg-white rounded-xl shadow-lg border border-gray-100 ">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Invoice #</th>
-                  {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Inspection ID</th> */}
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Patient</th>
-                  {/* <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Address</th> */}
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Services</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Amount</th>
-                  <th className="px-5 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th className="px-5 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {invoices.map((invoice) => (
-                  <tr key={invoice.id} className="hover:bg-gray-50">
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.id}</td>
-                    {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.inspectionId}</td> */}
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-900">{invoice.client}</td>
-                    {/* <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.address}</td> */}
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.serviceName}</td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-blue-600">{invoice.serviceProvider}</td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm text-gray-600">{invoice.created}</td>
-                    <td className="px-5 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${invoice.amount.toFixed(2)}</td>
-                    <td className="px-5 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(invoice.status)}`}>
-                        {invoice.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <div className="flex justify-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Invoice Grid */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <FiLoader className="animate-spin w-8 h-8 text-[#0A0F56] mr-3" />
+              <span className="text-gray-600">Loading invoices...</span>
+            </div>
+          ) : filteredInvoices.length === 0 ? (
+            <div className="text-center py-12">
+              <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-500 text-lg">No invoices found</p>
+              {searchTerm && <p className="text-gray-400 text-sm">Try adjusting your search term.</p>}
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <div className="min-w-[700px]">
+                {/* Header */}
+                <div className="bg-gray-50 grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_0.75fr_0.75fr] gap-x-4 px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                  <div className="text-left">Invoice #</div>
+                  <div className="text-left">Patient</div>
+                  <div className="text-left">Services</div>
+                  <div className="text-left">Created</div>
+                  <div className="text-left">Amount</div>
+                  <div className="text-left">Status</div>
+                  <div className="text-center">Actions</div>
+                </div>
+                
+                {/* Body */}
+                <div className="bg-white divide-y divide-gray-200">
+                  {filteredInvoices.map((invoice) => (
+                    <div key={invoice.id} className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_0.75fr_0.75fr] gap-x-4 px-5 py-4 hover:bg-gray-50 items-center text-sm">
+                      <div className="text-blue-600 truncate">{invoice.invoiceNumber}</div>
+                      <div className="text-gray-900 truncate">{invoice?.patient?.name || 'N/A'}</div>
+                      <div className="text-gray-600">
+                        <div className="truncate" title={invoice?.services?.map(service => service.name).join(', ')}>
+                          {invoice?.services?.map(service => service.name).join(', ') || 'No services'}
+                        </div>
+                      </div>
+                      <div className="text-gray-600 truncate">{formatDate(invoice?.createdAt)}</div>
+                      <div className="font-medium text-gray-900 truncate">${invoice.total.toFixed(2)}</div>
+                      <div className="text-left">
+                        <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(invoice.status)}`}>
+                          {invoice.status}
+                        </span>
+                      </div>
+                      <div className="flex justify-center items-center space-x-1">
+                        {invoice.status !== 'paid' && (
+                          <button
+                            onClick={() => handleMarkAsPaid(invoice.id)}
+                            disabled={isMarkingPaid && invoice.id === (dispatch(markInvoiceAsPaid(invoice.id) as any)?.arg)}
+                            className="text-green-500 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed p-1"
+                            title="Mark as Paid"
+                          >
+                            {(isMarkingPaid && invoice.id === (dispatch(markInvoiceAsPaid(invoice.id) as any)?.arg)) ? (
+                              <FiLoader className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <FiCheck className="w-4 h-4" />
+                            )}
+                          </button>
+                        )}
+                        <button className="text-blue-500 hover:text-blue-700 p-1" title="Edit">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                           </svg>
                         </button>
-                        <button className="text-blue-600 hover:text-blue-900">
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <button className="text-gray-500 hover:text-gray-700 p-1" title="Download">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 4.2v10.3" />
                           </svg>
                         </button>
                       </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

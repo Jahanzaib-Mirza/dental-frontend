@@ -37,7 +37,7 @@ export const PatientTable: React.FC<PatientTableProps> = ({ patients, onEdit }) 
             <tr
               key={patient.id}
               className="border-t border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
-              onClick={() => navigate('/patient-profile', { state: { patient } })}
+              onClick={() => navigate(`/patient-profile/${patient.id}`)}
             >
               <td className="flex items-center space-x-2 p-2">
                 <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">

@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { authService } from '../../api/services/auth';
 import type { LoginCredentials } from '../../api/services/auth';
 import type { User } from '../../api/services/users';
+import { updateProfile } from './profileSlice';
 
 interface AuthState {
   user: User | null;
@@ -124,6 +125,13 @@ const authSlice = createSlice({
         state.isAuthenticated = false;
         state.user = null;
         state.error = null; // Don't show error for logout failures
+      })
+      // Update Profile (from profileSlice)
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        // Update the current user data when profile is updated
+        if (state.user) {
+          state.user = { ...state.user, ...action.payload };
+        }
       });
   },
 });

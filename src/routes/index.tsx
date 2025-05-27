@@ -115,7 +115,7 @@ export const router = createBrowserRouter([
     ),
   },
   {
-    path: '/patient-profile',
+    path: '/patient-profile/:id',
     element: (
       <ProtectedRoute>
         <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>

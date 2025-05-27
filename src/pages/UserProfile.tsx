@@ -1,31 +1,41 @@
 import React, { useState, useRef } from 'react';
-import { useAppSelector } from '../lib/hooks';
+import { useAppSelector, useAppDispatch } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
 import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
+import { updateProfile, changePassword, type UpdateProfileData } from '../lib/store/slices/profileSlice';
+import type { ChangePasswordData } from '../lib/api/services/users';
+import toast from 'react-hot-toast';
 
 // Edit Profile Modal Component
-const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
+const EditProfileModal = ({ isOpen, onClose, user, onSave, isUpdating }: {
   isOpen: boolean;
   onClose: () => void;
   user: any;
-  onSave: (data: any) => void;
+  onSave: (data: UpdateProfileData) => void;
+  isUpdating?: boolean;
 }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
     gender: user?.gender || '',
     age: user?.age || '',
-    dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : '',
     specialization: user?.specialization || '',
     experience: user?.experience || '',
     education: user?.education || '',
+    licenseNumber: user?.licenseNumber || '',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    // Convert age to number if it's a string
+    const processedData = {
+      ...formData,
+      age: formData.age ? Number(formData.age) : undefined,
+      experience: formData.experience ? Number(formData.experience) : undefined,
+    };
+    onSave(processedData);
     onClose();
   };
 
@@ -89,50 +99,57 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
             />
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
-            <input
-              type="date"
-              value={formData.dateOfBirth}
-              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Specialization</label>
-            <select
-              value={formData.specialization}
-              onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-            >
-              <option value="">Select Specialization</option>
-              <option value="General Dentist">General Dentist</option>
-              <option value="Orthodontist">Orthodontist</option>
-              <option value="Endodontist">Endodontist</option>
-              <option value="Periodontist">Periodontist</option>
-              <option value="Pediatric Dentist">Pediatric Dentist</option>
-              <option value="Oral Surgeon">Oral Surgeon</option>
-              <option value="Prosthodontist">Prosthodontist</option>
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (years)</label>
-            <input
-              type="number"
-              value={formData.experience}
-              onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Education</label>
-            <input
-              type="text"
-              value={formData.education}
-              onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-            />
-          </div>
+          
+          {/* Doctor-specific fields */}
+          {user?.role !== 'receptionist' && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Specialization</label>
+                <select
+                  value={formData.specialization}
+                  onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+                >
+                  <option value="">Select Specialization</option>
+                  <option value="General Dentist">General Dentist</option>
+                  <option value="Orthodontist">Orthodontist</option>
+                  <option value="Endodontist">Endodontist</option>
+                  <option value="Periodontist">Periodontist</option>
+                  <option value="Pediatric Dentist">Pediatric Dentist</option>
+                  <option value="Oral Surgeon">Oral Surgeon</option>
+                  <option value="Prosthodontist">Prosthodontist</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">License Number</label>
+                <input
+                  type="text"
+                  value={formData.licenseNumber}
+                  onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (years)</label>
+                <input
+                  type="number"
+                  value={formData.experience}
+                  onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Education</label>
+                <input
+                  type="text"
+                  value={formData.education}
+                  onChange={(e) => setFormData({ ...formData, education: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+                />
+              </div>
+            </>
+                     )}
+           
           <div className="flex justify-end space-x-3 pt-2">
             <button
               type="button"
@@ -143,9 +160,10 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition"
+              disabled={isUpdating}
+              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Save Changes
+              {isUpdating ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -155,10 +173,11 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
 };
 
 // Change Password Modal Component
-const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
+const ChangePasswordModal = ({ isOpen, onClose, onSave, isChangingPassword }: {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: any) => void;
+  onSave: (data: ChangePasswordData) => void;
+  isChangingPassword?: boolean;
 }) => {
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -197,7 +216,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
     
     setErrors([]);
     onSave(formData);
-    onClose();
+    // Don't close modal here - let the parent component handle it after success
     setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
   };
 
@@ -266,9 +285,10 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
             </button>
             <button
               type="submit"
-              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition"
+              disabled={isChangingPassword}
+              className="px-5 py-2 bg-[#0A0F56] text-white rounded-lg font-semibold shadow hover:bg-[#232a7c] transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Update Password
+              {isChangingPassword ? 'Updating...' : 'Update Password'}
             </button>
           </div>
         </form>
@@ -278,7 +298,9 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
 };
 
 const UserProfile = () => {
+  const dispatch = useAppDispatch();
   const { user } = useAppSelector((state: RootState) => state.auth);
+  const { isUpdating, isChangingPassword } = useAppSelector((state: RootState) => state.profile);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
@@ -302,7 +324,7 @@ const UserProfile = () => {
     switch (role) {
       case 'doctor':
         return 'Doctor';
-      case 'admin':
+      case 'owner':
         return 'Administrator';
       case 'nurse':
         return 'Nurse';
@@ -326,16 +348,25 @@ const UserProfile = () => {
     }
   };
 
-  const handleEditProfile = (data: any) => {
-    console.log('Saving profile data:', data);
-    // Here you would typically dispatch an action to update the user profile
-    // dispatch(updateUserProfile(data));
+  const handleEditProfile = async (data: UpdateProfileData) => {
+    if (!user?.id) return;
+    
+    try {
+      await dispatch(updateProfile({ userId: user.id, profileData: data })).unwrap();
+      toast.success('Profile updated successfully!');
+    } catch (error) {
+      toast.error(error as string || 'Failed to update profile');
+    }
   };
 
-  const handleChangePassword = (data: any) => {
-    console.log('Changing password:', data);
-    // Here you would typically dispatch an action to change the password
-    // dispatch(changeUserPassword(data));
+  const handleChangePassword = async (data: ChangePasswordData) => {
+    try {
+      await dispatch(changePassword(data)).unwrap();
+      toast.success('Password changed successfully!');
+      setIsPasswordModalOpen(false);
+    } catch (error) {
+      toast.error(error as string || 'Failed to change password');
+    }
   };
 
   const handleCameraClick = () => {
@@ -369,10 +400,11 @@ const UserProfile = () => {
             <div className="flex space-x-3">
               <button
                 onClick={() => setIsEditModalOpen(true)}
-                className="flex items-center space-x-2 px-4 py-2 bg-[#0A0F56] text-white rounded-xl hover:bg-[#232a7c] transition-all font-medium"
+                disabled={isUpdating}
+                className="flex items-center space-x-2 px-4 py-2 bg-[#0A0F56] text-white rounded-xl hover:bg-[#232a7c] transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <FiEdit2 size={18} />
-                <span>Edit Profile</span>
+                <span>{isUpdating ? 'Updating...' : 'Edit Profile'}</span>
               </button>
               <button
                 onClick={() => setIsPasswordModalOpen(true)}
@@ -488,25 +520,27 @@ const UserProfile = () => {
               </div>
             </div>
 
-            {/* Professional Information */}
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
-              <div className="flex items-center mb-8">
-                <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
-                  <FiBriefcase className="w-6 h-6 text-purple-600" />
+            {/* Professional Information - Hidden for receptionists */}
+            {user.role !== 'receptionist' && (
+              <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8">
+                <div className="flex items-center mb-8">
+                  <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-4">
+                    <FiBriefcase className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-gray-900">Professional Information</h3>
+                    <p className="text-gray-500">Your work-related details</p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Professional Information</h3>
-                  <p className="text-gray-500">Your work-related details</p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <InfoItem icon={<FiBriefcase />} label="Specialization" value={user.specialization || 'General Practice'} />
+                  <InfoItem icon={<FiShield />} label="License Number" value={user.licenseNumber || 'Not provided'} />
+                  <InfoItem icon={<FiCalendar />} label="Experience" value={user.experience ? `${user.experience} years` : 'Not specified'} />
+                  <InfoItem icon={<FiUser />} label="Education" value={user.education || 'Not provided'} />
                 </div>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <InfoItem icon={<FiBriefcase />} label="Specialization" value={user.specialization || 'General Practice'} />
-                <InfoItem icon={<FiShield />} label="License Number" value={user.licenseNumber || 'Not provided'} />
-                <InfoItem icon={<FiCalendar />} label="Experience" value={user.experience ? `${user.experience} years` : 'Not specified'} />
-                <InfoItem icon={<FiUser />} label="Education" value={user.education || 'Not provided'} />
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
@@ -517,12 +551,14 @@ const UserProfile = () => {
         onClose={() => setIsEditModalOpen(false)}
         user={user}
         onSave={handleEditProfile}
+        isUpdating={isUpdating}
       />
 
       <ChangePasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
         onSave={handleChangePassword}
+        isChangingPassword={isChangingPassword}
       />
     </div>
   );

@@ -16,12 +16,14 @@ export const API_ENDPOINTS = {
     BASE: `${BASE_URL}/api/users`,
     DOCTORS: `${BASE_URL}/api/users/doctors`,
     BY_ID: (id: string) => `${BASE_URL}/api/users/${id}`,
+    CHANGE_PASSWORD: `${BASE_URL}/api/users/change-password`,
   },
 
   // Patient endpoints
   PATIENTS: {
     BASE: `${BASE_URL}/api/patients`,
     BY_ID: (id: string) => `${BASE_URL}/api/patients/${id}`,
+    DETAILS: (id: string) => `${BASE_URL}/api/patients/${id}/details`,
   },
 
   // Appointment endpoints
@@ -39,5 +41,11 @@ export const API_ENDPOINTS = {
   TREATMENTS: {
     BASE: `${BASE_URL}/api/treatments`,
     BY_ID: (id: string) => `${BASE_URL}/api/treatments/${id}`,
+  },
+
+  // Invoice endpoints
+  INVOICES: {
+    BASE: `${BASE_URL}/api/invoices`,
+    MARK_PAID: (id: string) => `${BASE_URL}/api/invoices/${id}/mark-paid`,
   },
 } as const; 

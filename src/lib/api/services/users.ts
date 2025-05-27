@@ -40,6 +40,12 @@ export interface CreateUserData {
   availability?: any[];
 }
 
+export interface ChangePasswordData {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export const userService = {
   getUsers: async () => {
     const response = await api.get(API_ENDPOINTS.USERS.BASE);
@@ -63,6 +69,11 @@ export const userService = {
 
   deleteUser: async (id: string) => {
     const response = await api.delete(API_ENDPOINTS.USERS.BY_ID(id));
+    return response.data;
+  },
+
+  changePassword: async (data: ChangePasswordData) => {
+    const response = await api.put(API_ENDPOINTS.USERS.CHANGE_PASSWORD, data);
     return response.data;
   }
 }; 
