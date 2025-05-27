@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FiCalendar, FiUser, FiMapPin, FiFileText, FiDollarSign, FiPrinter, FiDownload, FiMail } from 'react-icons/fi';
+import {  FiUser, FiFileText, FiDollarSign, FiPrinter, FiDownload, FiMail } from 'react-icons/fi';
 
 interface InvoiceItem {
   description: string;

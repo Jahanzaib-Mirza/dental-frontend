@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2 } from 'react-icons/fi';
+import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2, FiCpu } from 'react-icons/fi';
 import Select from 'react-select';
 import type { MultiValue } from 'react-select';
 import { appointmentService } from '../lib/api/services/appointments';
@@ -10,27 +10,38 @@ import type { ReportData } from '../components/Report/AttachReportModal';
 import { calculateAge } from '../lib/utils/dateUtils';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
-
-const serviceOptions = [
-  { value: 'consultation', label: 'Consultation' },
-  { value: 'xray', label: 'X-Ray' },
-  { value: 'cleaning', label: 'Cleaning' },
-  { value: 'filling', label: 'Filling' },
-  { value: 'extraction', label: 'Extraction' },
-  { value: 'whitening', label: 'Whitening' },
-];
+import { MedicineInput } from '../components/Medicine/MedicineInput';
+import type { Medicine } from '../components/Medicine/MedicineInput';
+import { useAppDispatch, useAppSelector } from '../lib/hooks';
+import { fetchServices } from '../lib/store/slices/servicesSlice';
+import { createTreatment, updateTreatment, fetchTreatment, clearTreatmentErrors } from '../lib/store/slices/treatmentsSlice';
+import type { RootState } from '../lib/store/store';
+import type { ServiceUsed, TreatmentReport } from '../lib/api/services/treatments';
+// import { cloudinaryUploadService } from '../lib/services/cloudinaryUpload';
 
 const AppointmentDetails = () => {
   const location = useLocation();
   const appointment = location.state?.appointment;
+  const dispatch = useAppDispatch();
+  
+  // Redux state
+  const { services } = useAppSelector((state: RootState) => state.services);
+  const { 
+    currentTreatment, 
+    isCreating, 
+    isUpdating, 
+    createError, 
+    updateError 
+  } = useAppSelector((state: RootState) => state.treatments);
+
   console.log(appointment);
 
-  // Editable fields: empty by default
-  const [reason, setReason] = useState('');
+  // Form state
+  const [diagnosis, setDiagnosis] = useState('');
   const [reviewNotes, setReviewNotes] = useState('');
-  const [selectedServices, setSelectedServices] = useState<MultiValue<{ value: string; label: string }>>([]);
-  // const [isInternational, setIsInternational] = useState(false);
+  const [selectedServices, setSelectedServices] = useState<MultiValue<{ value: string; label: string; price: number }>>([]);
   const [selectedFile] = useState<File | null>(null);
+  const [medicines, setMedicines] = useState<Medicine[]>([]);
 
   // Follow-up state
   const [isFollowUpEnabled, setIsFollowUpEnabled] = useState(false);
@@ -43,10 +54,71 @@ const AppointmentDetails = () => {
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [attachedReports, setAttachedReports] = useState<ReportData[]>([]);
 
-  // For status dropdowns
-  // const [roomNumber, setRoomNumber] = useState('Room Number: 288');
-  // const [riskStatus, setRiskStatus] = useState('Risky');
-  // const [treatmentStatus, setTreatmentStatus] = useState('Under Treatment');
+  // Treatment state
+  const [existingTreatmentId, setExistingTreatmentId] = useState<string | null>(null);
+
+  // Convert services to select options
+  const serviceOptions = services.map(service => ({
+    value: service.id,
+    label: service.name,
+    price: service.price
+  }));
+
+  // Fetch services and existing treatment on component mount
+  useEffect(() => {
+    dispatch(fetchServices());
+    
+    // If there's an existing treatment for this appointment, fetch it
+    if (appointment?.treatmentId) {
+      setExistingTreatmentId(appointment.treatmentId);
+      dispatch(fetchTreatment(appointment.treatmentId));
+    }
+  }, [dispatch, appointment?.treatmentId]);
+
+  // Populate form with existing treatment data
+  useEffect(() => {
+    if (currentTreatment) {
+      setDiagnosis(currentTreatment.diagnosis);
+      setReviewNotes(currentTreatment.notes);
+      setMedicines(currentTreatment.prescribedMedications);
+      setIsFollowUpEnabled(currentTreatment.followUpRecommended);
+      setFollowUpDate(currentTreatment.followUpDate || '');
+      setFollowUpTime(currentTreatment.followUpTime || '');
+      
+      // Set selected services
+      const servicesFromTreatment = currentTreatment.servicesUsed.map(service => ({
+        value: service.id,
+        label: service.name,
+        price: service.price
+      }));
+      setSelectedServices(servicesFromTreatment);
+
+      // Set attached reports - convert TreatmentReport to ReportData format
+      if (currentTreatment.reports && currentTreatment.reports.length > 0) {
+        const reportsFromTreatment = currentTreatment.reports.map(report => ({
+          testName: report.testName,
+          result: report.result,
+          image: null, // No need to convert back to File object
+          imageUrl: report.imageUrl,
+          imagePublicId: report.imagePublicId,
+          aiAnalysis: report.aiAnalysis
+        }));
+        setAttachedReports(reportsFromTreatment);
+      }
+    }
+  }, [currentTreatment]);
+
+  // Handle errors
+  useEffect(() => {
+    if (createError) {
+      toast.error(createError);
+      dispatch(clearTreatmentErrors());
+    }
+    if (updateError) {
+      toast.error(updateError);
+      dispatch(clearTreatmentErrors());
+    }
+  }, [createError, updateError, dispatch]);
 
   if (!appointment) {
     return (
@@ -58,17 +130,52 @@ const AppointmentDetails = () => {
     );
   }
 
-  // const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = event.target.files?.[0];
-  //   if (file) {
-  //     setSelectedFile(file);
-  //   }
-  // };
+  const handleSave = async () => {
+    try {
+      // Prepare services used data
+      const servicesUsed: ServiceUsed[] = selectedServices.map(service => ({
+        id: service.value,
+        name: service.label,
+        price: service.price
+      }));
 
-  const handleSave = () => {
-    // Here you would typically send the data to your backend
-    console.log('Saved:', { reason, reviewNotes, selectedFile, selectedServices, isFollowUpEnabled, followUpDate, followUpTime, attachedReports });
-    alert('Diagnosis details saved!');
+      // Prepare reports data - convert ReportData to TreatmentReport format
+      const reports: TreatmentReport[] = attachedReports.map(report => ({
+        testName: report.testName,
+        result: report.result,
+        imageUrl: report.imageUrl,
+        imagePublicId: report.imagePublicId,
+        aiAnalysis: report.aiAnalysis
+      }));
+
+      const treatmentData = {
+        appointment: appointment.id,
+        patient: appointment.patient.id,
+        diagnosis,
+        prescribedMedications: medicines.filter(med => med.name.trim() !== ''),
+        notes: reviewNotes,
+        servicesUsed,
+        reports,
+        followUpRecommended: isFollowUpEnabled,
+        ...(isFollowUpEnabled && followUpDate && { followUpDate }),
+        ...(isFollowUpEnabled && followUpTime && { followUpTime }),
+      };
+
+      if (existingTreatmentId) {
+        // Update existing treatment
+        await dispatch(updateTreatment({
+          id: existingTreatmentId,
+          treatmentData
+        })).unwrap();
+        toast.success('Treatment updated successfully!');
+      } else {
+        // Create new treatment
+        await dispatch(createTreatment(treatmentData)).unwrap();
+        toast.success('Treatment created successfully!');
+      }
+    } catch (error) {
+      // Error is handled by Redux and useEffect
+    }
   };
 
   // Fetch available slots for follow-up
@@ -139,6 +246,9 @@ const AppointmentDetails = () => {
       const imageUrl = URL.createObjectURL(report.image);
       // Open in new tab or a dedicated image viewer modal
       window.open(imageUrl, '_blank');
+    } else if (report.imageUrl) {
+      // Open Cloudinary image URL in new tab
+      window.open(report.imageUrl, '_blank');
     } else {
       toast.error('No image to preview for this report.');
     }
@@ -220,37 +330,46 @@ const AppointmentDetails = () => {
                   options={serviceOptions}
                   value={selectedServices}
                   onChange={setSelectedServices}
+                  isDisabled={isCreating || isUpdating}
                   classNamePrefix="react-select"
                   placeholder="Select services..."
                   styles={{
-                    control: (base, state) => ({ ...base, minHeight: '44px', borderRadius: '0.75rem', borderColor: state.isFocused ? '#2563EB' : '#B6C3E6', boxShadow: state.isFocused ? '0 0 0 2px #2563EB33' : 'none', background: '#F7F8FA', fontWeight: 600 }),
+                    control: (base, state) => ({ 
+                      ...base, 
+                      minHeight: '44px', 
+                      borderRadius: '0.75rem', 
+                      borderColor: state.isFocused ? '#2563EB' : '#B6C3E6', 
+                      boxShadow: state.isFocused ? '0 0 0 2px #2563EB33' : 'none', 
+                      background: '#F7F8FA', 
+                      fontWeight: 600,
+                      opacity: state.isDisabled ? 0.5 : 1,
+                      cursor: state.isDisabled ? 'not-allowed' : 'default'
+                    }),
                     multiValue: (base) => ({ ...base, backgroundColor: '#2563EB22', color: '#232360', fontWeight: 600 }),
                     option: (base, state) => ({ ...base, backgroundColor: state.isSelected ? '#0A0F56' : state.isFocused ? '#F0F4FF' : 'white', color: state.isSelected ? 'white' : '#232360', fontWeight: 600 }),
                     placeholder: (base) => ({ ...base, color: '#A0AEC0', fontWeight: 500 }),
                   }}
                 />
               </div>
-              <FormTextArea
-                label="Medicines"
-                value={reason}
-                onChange={e => setReason(e.target.value)}
-                placeholder="Enter prescribed medicines..."
-              />
-              <FormTextArea
-                label="Review Notes"
-                value={reviewNotes}
-                onChange={e => setReviewNotes(e.target.value)}
-                placeholder="Enter review notes..."
-              />
-              {/* <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={isInternational}
-                  onChange={e => setIsInternational(e.target.checked)}
-                  className="accent-[#2563EB] rounded focus:ring-2 focus:ring-[#2563EB]"
+                              <MedicineInput
+                  medicines={medicines}
+                  onChange={setMedicines}
+                  disabled={isCreating || isUpdating}
                 />
-                <span className="text-sm font-semibold text-[#232360]">International Patient</span>
-              </div> */}
+                <FormTextArea
+                  label="Diagnosis"
+                  value={diagnosis}
+                  onChange={e => setDiagnosis(e.target.value)}
+                  placeholder="Enter diagnosis..."
+                  disabled={isCreating || isUpdating}
+                />
+                <FormTextArea
+                  label="Review Notes"
+                  value={reviewNotes}
+                  onChange={e => setReviewNotes(e.target.value)}
+                  placeholder="Enter review notes..."
+                  disabled={isCreating || isUpdating}
+                />
 
               {/* Follow-up Section */}
               <div className="space-y-4 mt-6 p-4 border border-gray-200 rounded-lg bg-white shadow-sm">
@@ -267,7 +386,8 @@ const AppointmentDetails = () => {
                         setFollowUpAvailableSlots([]);
                       }
                     }}
-                    className="accent-[#2563EB] rounded focus:ring-2 focus:ring-[#2563EB]"
+                    disabled={isCreating || isUpdating}
+                    className="accent-[#2563EB] rounded focus:ring-2 focus:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
                     id="followUpCheckbox"
                   />
                   <label htmlFor="followUpCheckbox" className="text-sm font-semibold text-[#232360]">Schedule Follow-up?</label>
@@ -282,8 +402,8 @@ const AppointmentDetails = () => {
                         value={followUpDate}
                         onChange={handleFollowUpDateChange}
                         min={getMinDate()}
-                        className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]"
-                        disabled={!appointment?.doctor.id} // Disable if no doctorId
+                        className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={!appointment?.doctor.id || isCreating || isUpdating} // Disable if no doctorId or during submission
                       />
                       {!appointment?.doctor.id && <p className="text-xs text-red-500 mt-1">Doctor ID not available for slot booking.</p>}
                     </div>
@@ -293,8 +413,8 @@ const AppointmentDetails = () => {
                         <select
                           value={followUpTime}
                           onChange={handleFollowUpTimeChange}
-                          className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]"
-                          disabled={isLoadingFollowUpSlots || followUpAvailableSlots.length === 0}
+                          className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={isLoadingFollowUpSlots || followUpAvailableSlots.length === 0 || isCreating || isUpdating}
                         >
                           <option value="">{isLoadingFollowUpSlots ? 'Loading...' : 'Select Time'}</option>
                           {followUpAvailableSlots.map(slot => (
@@ -327,29 +447,86 @@ const AppointmentDetails = () => {
                 {attachedReports.length > 0 ? (
                   <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                     {attachedReports.map((report, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
-                          <p className="text-xs text-gray-500 truncate">{report.result}</p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-2">
-                          {report.image && (
+                      <div key={index} className="p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
+                            <p className="text-xs text-gray-500 truncate">{report.result}</p>
+                          </div>
+                          <div className="flex items-center space-x-2 ml-2">
+                            {report.aiAnalysis && (
+                              <>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  <FiCpu className="mr-1 h-3 w-3" />
+                                  AI Analyzed
+                                </span>
+                                {report.aiAnalysis.imageType && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    {report.aiAnalysis.imageType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                  </span>
+                                )}
+                              </>
+                            )}
+                            {(report.image || report.imageUrl) && (
+                              <button
+                                onClick={() => handlePreviewReportImage(report)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                                title="Preview Image"
+                              >
+                                <FiEye size={18} />
+                              </button>
+                            )}
                             <button
-                              onClick={() => handlePreviewReportImage(report)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                              title="Preview Image"
+                              onClick={() => handleRemoveReport(index)}
+                              className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                              title="Remove Report"
                             >
-                              <FiEye size={18} />
+                              <FiTrash2 size={18} />
                             </button>
-                          )}
-                          <button
-                            onClick={() => handleRemoveReport(index)}
-                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
-                            title="Remove Report"
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
+                          </div>
                         </div>
+                        
+                        {/* AI Analysis Results Display */}
+                        {report.aiAnalysis && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="text-xs font-semibold text-blue-900">AI Analysis Results</h5>
+                              <span className="text-xs text-blue-700 font-medium">
+                                {report.aiAnalysis.confidence}% Confidence
+                              </span>
+                            </div>
+                            
+                            {report.aiAnalysis.detectedConditions.length > 0 && (
+                              <div className="mb-2">
+                                <p className="text-xs font-semibold text-blue-800 mb-1">Detected Conditions:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {report.aiAnalysis.detectedConditions.map((condition, condIndex) => (
+                                    <span
+                                      key={condIndex}
+                                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                    >
+                                      {condition}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {report.aiAnalysis.recommendations.length > 0 && (
+                              <div>
+                                <p className="text-xs font-semibold text-blue-800 mb-1">AI Recommendations:</p>
+                                <ul className="text-xs text-blue-700 space-y-1">
+                                  {report.aiAnalysis.recommendations.slice(0, 2).map((rec, recIndex) => (
+                                    <li key={recIndex} className="flex items-start">
+                                      <span className="mr-2">•</span>
+                                      <span>{rec}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -376,9 +553,17 @@ const AppointmentDetails = () => {
               <div className="flex justify-end mt-10">
                 <button
                   type="submit"
-                  className="bg-[#0A0F56] text-white px-8 py-3 rounded-lg text-base hover:bg-[#2563EB] transition font-bold shadow-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB]"
+                  disabled={isCreating || isUpdating}
+                  className="bg-[#0A0F56] text-white px-8 py-3 rounded-lg text-base hover:bg-[#2563EB] transition font-bold shadow-lg focus:outline-none focus:ring-2 focus:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
                 >
-                  Save
+                  {(isCreating || isUpdating) ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white mr-2"></div>
+                      {existingTreatmentId ? 'Updating...' : 'Saving...'}
+                    </>
+                  ) : (
+                    existingTreatmentId ? 'Update Treatment' : 'Save Treatment'
+                  )}
                 </button>
               </div>
             </form>
@@ -438,14 +623,15 @@ const FormIconField = ({ label, value, icon, readOnly = false }: { label: string
   </div>
 );
 
-const FormTextArea = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; placeholder?: string }) => (
+const FormTextArea = ({ label, value, onChange, placeholder, disabled = false }: { label: string; value: string; onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void; placeholder?: string; disabled?: boolean }) => (
   <div>
     <label className="block text-sm mb-2 font-bold text-[#232360]">{label}</label>
     <textarea
-      className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm h-20 resize-none bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]"
+      className="w-full border border-[#B6C3E6] rounded-lg p-3 text-sm h-20 resize-none bg-[#F7F8FA] font-semibold text-[#232360] focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB] disabled:opacity-50 disabled:cursor-not-allowed"
       value={value}
       onChange={onChange}
       placeholder={placeholder}
+      disabled={disabled}
     />
   </div>
 );

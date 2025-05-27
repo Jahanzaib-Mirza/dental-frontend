@@ -1,4 +1,5 @@
-const BASE_URL = 'https://dental-backend-htv7.onrender.com';
+// const BASE_URL = 'https://dental-backend-htv7.onrender.com';
+const BASE_URL = 'http://localhost:1337';
 
 export const API_ENDPOINTS = {
   // Auth endpoints
@@ -28,5 +29,15 @@ export const API_ENDPOINTS = {
     BASE: `${BASE_URL}/api/appointments`,
     AVAILABLE_SLOTS: `${BASE_URL}/api/appointments/available-slots`,
     BY_ID: (id: string) => `${BASE_URL}/api/appointments/${id}`,
+  },
+
+  SERVICES: {
+    BASE: `${BASE_URL}/api/services`,
+    BY_ID: (id: string) => `${BASE_URL}/api/services/${id}`,
+  },
+
+  TREATMENTS: {
+    BASE: `${BASE_URL}/api/treatments`,
+    BY_ID: (id: string) => `${BASE_URL}/api/treatments/${id}`,
   },
 } as const; 

@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useAppSelector } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
-import { FiUser, FiMail, FiPhone, FiMapPin, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiSave, FiX, FiEye, FiEyeOff, FiSettings, FiShield } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 
@@ -165,7 +165,7 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave }: {
     newPassword: '',
     confirmPassword: '',
   });
-  const [showPasswords, setShowPasswords] = useState({
+  const [showPasswords] = useState({
     current: false,
     new: false,
     confirm: false,
@@ -481,10 +481,10 @@ const UserProfile = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <InfoItem icon={<FiMail />} label="Email Address" value={user.email} />
                 <InfoItem icon={<FiPhone />} label="Phone Number" value={user.phone || 'Not provided'} />
-                <InfoItem icon={<FiCalendar />} label="Date of Birth" value={user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : 'Not provided'} />
+                {/* <InfoItem icon={<FiCalendar />} label="Date of Birth" value={user.dateOfBirth ? new Date(user.dateOfBirth).toLocaleDateString() : 'Not provided'} /> */}
                 <InfoItem icon={<FiUser />} label="Gender" value={user.gender || 'Not specified'} />
                 <InfoItem icon={<FiCalendar />} label="Age" value={user.age ? `${user.age} years` : 'Not specified'} />
-                <InfoItem icon={<FiMapPin />} label="Location" value={user.address || 'Not provided'} />
+                {/* <InfoItem icon={<FiMapPin />} label="Location" value={user.address || 'Not provided'} /> */}
               </div>
             </div>
 

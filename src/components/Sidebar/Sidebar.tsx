@@ -1,27 +1,11 @@
 import { icons } from "../../assets";
 import Icon from "../Icons";
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '../../lib/hooks';
+import { useAppDispatch, useAppSelector } from '../../lib/hooks';
 import { logoutUser } from '../../lib/store/slices/authSlice';
-
-const navLinks = [
-  { label: 'Dashboard', icon: 'bar_chart', path: '/dashboard' },
-  { label: 'Doctors', icon: 'calender_add', path: '/doctors' },
-  { label: 'Appointments', icon: 'vase', path: '/appointments' },
-  { label: 'Patients', icon: 'users', path: '/patients' },
-  { label: 'Services', icon: 'document_chart', path: '/services' },
-  // { label: 'Add Appointment', icon: 'users', path: '/add-appointment' },
-  // { label: 'Add Patient', icon: 'users', path: '/add-patient' },
-
-
-  { divider: true },
-  { label: 'Invoice', icon: 'document_chart', path: '/invoice' },
-  { label: 'Expense', icon: 'document_chart', path: '/expense' },
-  { label: 'Account', icon: 'user', path: '/account' },
-  { divider: true },
-  // { label: 'Settings', icon: 'settings', path: '/settings' },
-  { label: 'Log Out', icon: 'logout', path: '/logout', isLogout: true },
-];
+import { getFilteredRoutes, hasRouteAccess } from '../../lib/utils/rolePermissions';
+import type { UserRole } from '../../lib/utils/rolePermissions';
+import type { RootState } from '../../lib/store/store';
 
 
 interface MenuItemProps {
@@ -65,13 +49,24 @@ interface MenuItemProps {
 export function Sidebar() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const user = useAppSelector((state: RootState) => state.auth.user);
+
+  // Get filtered routes based on user role
+  const userRole = user?.role as UserRole;
+  const allowedRoutes = userRole ? getFilteredRoutes(userRole) : [];
 
   const handleNavigation = async (path: string, isLogout?: boolean) => {
     if (isLogout) {
       await dispatch(logoutUser());
       navigate('/login');
     } else {
-      navigate(path);
+      // Check if user has access to the route before navigating
+      if (userRole && hasRouteAccess(userRole, path)) {
+        navigate(path);
+      } else {
+        // Optionally show a toast or alert here
+        console.warn(`Access denied to ${path} for role ${userRole}`);
+      }
     }
   };
 
@@ -90,21 +85,27 @@ export function Sidebar() {
         <div className="bg-gray-100 h-0.5 w-full mb-6"></div>
 
         <nav className="flex-1 flex flex-col gap-1">
-          {navLinks.map((link, idx) => {
-            if (link.divider) {
-              return <div key={idx} className="bg-gray-100 h-0.5 w-full my-3"></div>;
-            } else if (link.icon && link.label) {
-              return (
-                <MenuItem
-                  key={link.label}
-                  icon={link.icon as keyof typeof icons}
-                  text={link.label}
-                  onClick={() => handleNavigation(link.path, link.isLogout)}
-                />
+          {allowedRoutes.map((route, idx) => {
+            const elements = [];
+            
+            // Add divider before the route if it has divider: true
+            if (route.divider && idx > 0) {
+              elements.push(
+                <div key={`divider-${idx}`} className="bg-gray-100 h-0.5 w-full my-3"></div>
               );
-            } else {
-              return null;
             }
+            
+            // Add the menu item
+            elements.push(
+              <MenuItem
+                key={route.label}
+                icon={route.icon as keyof typeof icons}
+                text={route.label}
+                onClick={() => handleNavigation(route.path, route.isLogout)}
+              />
+            );
+            
+            return elements;
           })}
         </nav>
       </div>
