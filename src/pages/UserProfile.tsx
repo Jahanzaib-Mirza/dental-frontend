@@ -5,7 +5,7 @@ import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, Fi
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 import { updateProfile, changePassword, type UpdateProfileData } from '../lib/store/slices/profileSlice';
-import { getProfile, updateUserData } from '../lib/store/slices/authSlice';
+import { updateUserData } from '../lib/store/slices/authSlice';
 import { userService } from '../lib/api/services/users';
 import type { ChangePasswordData } from '../lib/api/services/users';
 import { cloudinaryUploadService } from '../lib/services/cloudinaryUpload';
