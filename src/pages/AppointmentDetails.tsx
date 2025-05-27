@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2 } from 'react-icons/fi';
+import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2, FiCpu } from 'react-icons/fi';
 import Select from 'react-select';
 import type { MultiValue } from 'react-select';
 import { appointmentService } from '../lib/api/services/appointments';
@@ -16,7 +16,8 @@ import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchServices } from '../lib/store/slices/servicesSlice';
 import { createTreatment, updateTreatment, fetchTreatment, clearTreatmentErrors } from '../lib/store/slices/treatmentsSlice';
 import type { RootState } from '../lib/store/store';
-import type { ServiceUsed } from '../lib/api/services/treatments';
+import type { ServiceUsed, TreatmentReport } from '../lib/api/services/treatments';
+// import { cloudinaryUploadService } from '../lib/services/cloudinaryUpload';
 
 const AppointmentDetails = () => {
   const location = useLocation();
@@ -91,6 +92,19 @@ const AppointmentDetails = () => {
         price: service.price
       }));
       setSelectedServices(servicesFromTreatment);
+
+      // Set attached reports - convert TreatmentReport to ReportData format
+      if (currentTreatment.reports && currentTreatment.reports.length > 0) {
+        const reportsFromTreatment = currentTreatment.reports.map(report => ({
+          testName: report.testName,
+          result: report.result,
+          image: null, // No need to convert back to File object
+          imageUrl: report.imageUrl,
+          imagePublicId: report.imagePublicId,
+          aiAnalysis: report.aiAnalysis
+        }));
+        setAttachedReports(reportsFromTreatment);
+      }
     }
   }, [currentTreatment]);
 
@@ -125,6 +139,15 @@ const AppointmentDetails = () => {
         price: service.price
       }));
 
+      // Prepare reports data - convert ReportData to TreatmentReport format
+      const reports: TreatmentReport[] = attachedReports.map(report => ({
+        testName: report.testName,
+        result: report.result,
+        imageUrl: report.imageUrl,
+        imagePublicId: report.imagePublicId,
+        aiAnalysis: report.aiAnalysis
+      }));
+
       const treatmentData = {
         appointment: appointment.id,
         patient: appointment.patient.id,
@@ -132,6 +155,7 @@ const AppointmentDetails = () => {
         prescribedMedications: medicines.filter(med => med.name.trim() !== ''),
         notes: reviewNotes,
         servicesUsed,
+        reports,
         followUpRecommended: isFollowUpEnabled,
         ...(isFollowUpEnabled && followUpDate && { followUpDate }),
         ...(isFollowUpEnabled && followUpTime && { followUpTime }),
@@ -222,6 +246,9 @@ const AppointmentDetails = () => {
       const imageUrl = URL.createObjectURL(report.image);
       // Open in new tab or a dedicated image viewer modal
       window.open(imageUrl, '_blank');
+    } else if (report.imageUrl) {
+      // Open Cloudinary image URL in new tab
+      window.open(report.imageUrl, '_blank');
     } else {
       toast.error('No image to preview for this report.');
     }
@@ -420,29 +447,86 @@ const AppointmentDetails = () => {
                 {attachedReports.length > 0 ? (
                   <div className="space-y-3 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
                     {attachedReports.map((report, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
-                          <p className="text-xs text-gray-500 truncate">{report.result}</p>
-                        </div>
-                        <div className="flex items-center space-x-2 ml-2">
-                          {report.image && (
+                      <div key={index} className="p-3 bg-gray-50 rounded-md border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-[#232360] truncate">{report.testName}</p>
+                            <p className="text-xs text-gray-500 truncate">{report.result}</p>
+                          </div>
+                          <div className="flex items-center space-x-2 ml-2">
+                            {report.aiAnalysis && (
+                              <>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200">
+                                  <FiCpu className="mr-1 h-3 w-3" />
+                                  AI Analyzed
+                                </span>
+                                {report.aiAnalysis.imageType && (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                    {report.aiAnalysis.imageType.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                                  </span>
+                                )}
+                              </>
+                            )}
+                            {(report.image || report.imageUrl) && (
+                              <button
+                                onClick={() => handlePreviewReportImage(report)}
+                                className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                                title="Preview Image"
+                              >
+                                <FiEye size={18} />
+                              </button>
+                            )}
                             <button
-                              onClick={() => handlePreviewReportImage(report)}
-                              className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                              title="Preview Image"
+                              onClick={() => handleRemoveReport(index)}
+                              className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
+                              title="Remove Report"
                             >
-                              <FiEye size={18} />
+                              <FiTrash2 size={18} />
                             </button>
-                          )}
-                          <button
-                            onClick={() => handleRemoveReport(index)}
-                            className="text-red-500 hover:text-red-700 p-1 rounded-full hover:bg-red-100 transition-colors"
-                            title="Remove Report"
-                          >
-                            <FiTrash2 size={18} />
-                          </button>
+                          </div>
                         </div>
+                        
+                        {/* AI Analysis Results Display */}
+                        {report.aiAnalysis && (
+                          <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="text-xs font-semibold text-blue-900">AI Analysis Results</h5>
+                              <span className="text-xs text-blue-700 font-medium">
+                                {report.aiAnalysis.confidence}% Confidence
+                              </span>
+                            </div>
+                            
+                            {report.aiAnalysis.detectedConditions.length > 0 && (
+                              <div className="mb-2">
+                                <p className="text-xs font-semibold text-blue-800 mb-1">Detected Conditions:</p>
+                                <div className="flex flex-wrap gap-1">
+                                  {report.aiAnalysis.detectedConditions.map((condition, condIndex) => (
+                                    <span
+                                      key={condIndex}
+                                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                    >
+                                      {condition}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {report.aiAnalysis.recommendations.length > 0 && (
+                              <div>
+                                <p className="text-xs font-semibold text-blue-800 mb-1">AI Recommendations:</p>
+                                <ul className="text-xs text-blue-700 space-y-1">
+                                  {report.aiAnalysis.recommendations.slice(0, 2).map((rec, recIndex) => (
+                                    <li key={recIndex} className="flex items-start">
+                                      <span className="mr-2">•</span>
+                                      <span>{rec}</span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

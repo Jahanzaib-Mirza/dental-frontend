@@ -1,6 +1,63 @@
-# React + TypeScript + Vite
+# Dental Practice Management System
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A comprehensive dental practice management system built with React, TypeScript, and Vite. Features include appointment scheduling, patient management, treatment tracking, and AI-powered dental X-ray analysis.
+
+## 🚀 Features
+
+- **Patient Management**: Complete patient records with medical history
+- **Appointment Scheduling**: Advanced booking system with time slot management
+- **Treatment Tracking**: Detailed treatment records with medication management
+- **Services Management**: Configurable dental services and pricing
+- **Role-Based Access Control**: Owner, Receptionist, and Doctor roles
+- **AI-Powered X-ray Analysis**: Automated dental radiograph analysis using Google Gemini AI
+- **Report Management**: Upload and analyze medical reports with AI assistance
+
+## 🤖 AI-Powered Dental X-ray Analysis
+
+This system includes advanced AI capabilities for analyzing dental X-rays using **Google Gemini AI**:
+
+### Features:
+- **Automatic X-ray Validation**: Detects if uploaded images are actually dental X-rays
+- **Comprehensive Analysis**: Provides detailed findings about dental structures, bone density, and abnormalities
+- **Condition Detection**: Identifies common dental conditions like caries, bone loss, impactions
+- **Clinical Recommendations**: Suggests follow-up actions and clinical correlations
+- **Confidence Scoring**: Provides confidence levels for analysis results
+- **Professional Medical Analysis**: Uses Google's advanced AI for high-quality medical image analysis
+
+### 🆓 Google Gemini API (FREE)
+
+- **Free Tier**: 60 requests per minute, 1500 requests per day
+- **Get API Key**: [Google AI Studio](https://makersuite.google.com/app/apikey)
+- **High-quality image analysis** with generous free limits
+- **Specifically optimized** for medical and dental imaging
+
+### Setup:
+1. Get your free Google Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+2. Create a `.env` file in the project root:
+   ```env
+   VITE_GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+3. Restart your development server
+4. The system will automatically validate images and provide AI analysis
+
+### Usage:
+1. Navigate to Appointment Details
+2. Click "Attach New Report"
+3. Upload a dental X-ray image
+4. Click "Analyze X-ray" for AI-powered analysis
+5. Review findings, detected conditions, and recommendations
+6. Use AI findings to populate the report or add manual notes
+
+### 🔒 Image Validation:
+The system automatically validates that uploaded images are actually dental X-rays and will reject:
+- Regular photos
+- Pictures of animals or people
+- Non-medical images
+- Other types of medical scans
+
+Only genuine dental radiographs will be analyzed!
+
+## 🛠️ Development
 
 Currently, two official plugins are available:
 

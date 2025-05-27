@@ -1,5 +1,6 @@
 import api from '../axios';
 import { API_ENDPOINTS } from '../endpoints';
+import type { AIAnalysisResult } from './aiAnalysis';
 
 export interface Medication {
   name: string;
@@ -14,6 +15,14 @@ export interface ServiceUsed {
   price: number;
 }
 
+export interface TreatmentReport {
+  testName: string;
+  result: string;
+  imageUrl?: string; // Cloudinary image URL
+  imagePublicId?: string; // Cloudinary public ID for image management
+  aiAnalysis?: AIAnalysisResult;
+}
+
 export interface Treatment {
   id: string;
   appointment: string;
@@ -23,6 +32,7 @@ export interface Treatment {
   prescribedMedications: Medication[];
   notes: string;
   servicesUsed: ServiceUsed[];
+  reports: TreatmentReport[];
   followUpRecommended: boolean;
   followUpDate?: string;
   followUpTime?: string;
@@ -40,6 +50,7 @@ export interface CreateTreatmentData {
   prescribedMedications: Medication[];
   notes: string;
   servicesUsed: ServiceUsed[];
+  reports: TreatmentReport[];
   followUpRecommended: boolean;
   followUpDate?: string;
   followUpTime?: string;
@@ -50,6 +61,7 @@ export interface UpdateTreatmentData {
   prescribedMedications?: Medication[];
   notes?: string;
   servicesUsed?: ServiceUsed[];
+  reports?: TreatmentReport[];
   followUpRecommended?: boolean;
   followUpDate?: string;
   followUpTime?: string;
