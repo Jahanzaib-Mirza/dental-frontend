@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useAppSelector } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
 import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
@@ -14,9 +14,10 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
 }) => {
   const [formData, setFormData] = useState({
     name: user?.name || '',
-    email: user?.email || '',
     phone: user?.phone || '',
-    address: user?.address || '',
+    gender: user?.gender || '',
+    age: user?.age || '',
+    dateOfBirth: user?.dateOfBirth ? user.dateOfBirth.slice(0, 10) : '',
     specialization: user?.specialization || '',
     experience: user?.experience || '',
     education: user?.education || '',
@@ -31,9 +32,9 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/10 backdrop-blur-md">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-2xl border border-gray-100 relative animate-fadeIn max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
+    <div className="fixed inset-0 flex items-center justify-center bg-white/10 backdrop-blur-md">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-lg border border-gray-100 relative animate-fadeIn">
+        <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold text-gray-900">Edit Profile</h2>
           <button
             onClick={onClose}
@@ -43,30 +44,20 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
             ×
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Full Name</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+        <form onSubmit={handleSubmit} className="space-y-2">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+              required
+            />
+          </div>
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Phone</label>
               <input
                 type="tel"
                 value={formData.phone}
@@ -74,44 +65,75 @@ const EditProfileModal = ({ isOpen, onClose, user, onSave }: {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
               />
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Specialization</label>
-              <input
-                type="text"
-                value={formData.specialization}
-                onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+            <div className="flex-1">
+              <label className="block text-sm font-semibold text-gray-700 mb-1">Gender</label>
+              <select
+                value={formData.gender}
+                onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Experience (years)</label>
-              <input
-                type="number"
-                value={formData.experience}
-                onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Education</label>
-              <input
-                type="text"
-                value={formData.education}
-                onChange={(e) => setFormData({ ...formData, education: e.target.value })}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
-              />
+              >
+                <option value="">Select Gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+              </select>
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Address</label>
-            <textarea
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50 h-24 resize-none"
-              placeholder="Enter your address"
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Age</label>
+            <input
+              type="number"
+              min="0"
+              value={formData.age}
+              onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
             />
           </div>
-          <div className="flex justify-end space-x-4 pt-4">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+            <input
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Specialization</label>
+            <select
+              value={formData.specialization}
+              onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+            >
+              <option value="">Select Specialization</option>
+              <option value="General Dentist">General Dentist</option>
+              <option value="Orthodontist">Orthodontist</option>
+              <option value="Endodontist">Endodontist</option>
+              <option value="Periodontist">Periodontist</option>
+              <option value="Pediatric Dentist">Pediatric Dentist</option>
+              <option value="Oral Surgeon">Oral Surgeon</option>
+              <option value="Prosthodontist">Prosthodontist</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Experience (years)</label>
+            <input
+              type="number"
+              value={formData.experience}
+              onChange={(e) => setFormData({ ...formData, experience: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Education</label>
+            <input
+              type="text"
+              value={formData.education}
+              onChange={(e) => setFormData({ ...formData, education: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0A0F56] bg-gray-50"
+            />
+          </div>
+          <div className="flex justify-end space-x-3 pt-2">
             <button
               type="button"
               onClick={onClose}
@@ -259,6 +281,8 @@ const UserProfile = () => {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!user) {
     return (
@@ -314,6 +338,24 @@ const UserProfile = () => {
     // dispatch(changeUserPassword(data));
   };
 
+  const handleCameraClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files && e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
@@ -352,7 +394,13 @@ const UserProfile = () => {
             <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 text-center">
               {/* Profile Image */}
               <div className="relative mb-6">
-                {user.profileImage ? (
+                {avatarPreview ? (
+                  <img
+                    src={avatarPreview}
+                    alt={user.name}
+                    className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
+                  />
+                ) : user.profileImage ? (
                   <img
                     src={user.profileImage}
                     alt={user.name}
@@ -369,9 +417,21 @@ const UserProfile = () => {
                     />
                   </div>
                 )}
-                <button className="absolute bottom-2 right-1/2 transform translate-x-1/2 translate-y-1/2 bg-[#0A0F56] text-white p-3 rounded-full shadow-lg hover:bg-[#232a7c] transition-all">
+                <button
+                  className="absolute bottom-2 right-1/2 transform translate-x-1/2 translate-y-1/2 bg-[#0A0F56] text-white p-3 rounded-full shadow-lg hover:bg-[#232a7c] transition-all"
+                  onClick={handleCameraClick}
+                  type="button"
+                >
                   <FiCamera size={16} />
                 </button>
+                <input
+                  type="file"
+                  accept="image/*"
+                  capture="user"
+                  ref={fileInputRef}
+                  style={{ display: 'none' }}
+                  onChange={handleAvatarChange}
+                />
               </div>
 
               {/* Basic Info */}
