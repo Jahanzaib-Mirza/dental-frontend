@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiActivity, FiClock, FiDollarSign } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiActivity, FiDollarSign } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 import { calculateAge } from '../lib/utils/dateUtils';
@@ -406,15 +406,15 @@ const PatientProfile = () => {
 };
 
 // Helper component for info items
-const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-    <div className="flex-shrink-0">{icon}</div>
-    <div className="flex-1 min-w-0">
-      <p className="text-sm font-medium text-gray-700">{label}</p>
-      <p className="text-sm text-gray-900 truncate">{value}</p>
-    </div>
-  </div>
-);
+// const InfoItem = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+//   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+//     <div className="flex-shrink-0">{icon}</div>
+//     <div className="flex-1 min-w-0">
+//       <p className="text-sm font-medium text-gray-700">{label}</p>
+//       <p className="text-sm text-gray-900 truncate">{value}</p>
+//     </div>
+//   </div>
+// );
 
 // Enhanced info card component
 const InfoCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
