@@ -32,6 +32,7 @@ export interface CreateUserData {
   role: 'owner' | 'receptionist' | 'doctor';
   gender?: string;
   age?: number;
+  profileImage?: string;
   specialization?: string;
   licenseNumber?: string;
   licenseDocumentUrl?: string;

@@ -1,11 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { useAppSelector, useAppDispatch } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiBriefcase, FiEdit2, FiCamera, FiLock, FiShield, FiUpload, FiX, FiLoader } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 import { updateProfile, changePassword, type UpdateProfileData } from '../lib/store/slices/profileSlice';
+import { getProfile, updateUserData } from '../lib/store/slices/authSlice';
+import { userService } from '../lib/api/services/users';
 import type { ChangePasswordData } from '../lib/api/services/users';
+import { cloudinaryUploadService } from '../lib/services/cloudinaryUpload';
 import toast from 'react-hot-toast';
 
 // Edit Profile Modal Component
@@ -297,14 +300,217 @@ const ChangePasswordModal = ({ isOpen, onClose, onSave, isChangingPassword }: {
   );
 };
 
+// Image Upload Modal Component
+const ImageUploadModal = ({ isOpen, onClose, onSave }: {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (imageUrl: string) => void;
+}) => {
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleRemoveImage = () => {
+    setSelectedFile(null);
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!selectedFile) {
+      toast.error('Please select an image first');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      
+      // Show immediate feedback
+      toast.loading('Uploading image to cloud storage...', { id: 'upload-toast' });
+      
+      const result = await cloudinaryUploadService.uploadImage(selectedFile, {
+        folder: 'profile-images',
+        tags: ['profile', 'user-avatar'],
+      });
+
+      // Update toast message
+      toast.loading('Updating your profile...', { id: 'upload-toast' });
+      
+      onSave(result.secure_url);
+      
+      // Success will be handled by the parent component
+      toast.dismiss('upload-toast');
+      onClose();
+      
+      // Reset state
+      setSelectedFile(null);
+      setImagePreview(null);
+    } catch (error: any) {
+      console.error('Upload failed:', error);
+      toast.error(error.message || 'Failed to upload image', { id: 'upload-toast' });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleClose = () => {
+    if (!uploading) {
+      setSelectedFile(null);
+      setImagePreview(null);
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50">
+      <div className="bg-white rounded-2xl shadow-2xl border border-gray-200 w-full max-w-md mx-4">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">Upload Profile Image</h2>
+            <button
+              onClick={handleClose}
+              disabled={uploading}
+              className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56] disabled:opacity-50"
+              aria-label="Close modal"
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Upload Area */}
+          <div
+            className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#0A0F56] transition-colors cursor-pointer"
+            onDrop={handleDrop}
+            onDragOver={handleDragOver}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {imagePreview ? (
+              <div className="relative">
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-gray-200"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleRemoveImage();
+                  }}
+                  className="absolute top-0 right-1/2 transform translate-x-1/2 -translate-y-2 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600 transition-colors"
+                >
+                  <FiX size={14} />
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <FiUpload className="mx-auto h-12 w-12 text-gray-400" />
+                <div>
+                  <p className="text-lg font-medium text-gray-900">Upload your profile image</p>
+                  <p className="text-sm text-gray-500 mt-1">Drag and drop or click to browse</p>
+                </div>
+              </div>
+            )}
+            
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </div>
+
+          {selectedFile && (
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-600">
+                <strong>Selected:</strong> {selectedFile.name}
+              </p>
+              <p className="text-xs text-gray-500 mt-1">
+                Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+              </p>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-500 mt-4 text-center">
+            Supported formats: JPEG, PNG, WebP (max 10MB)
+          </p>
+
+          {/* Action Buttons */}
+          <div className="flex space-x-3 mt-6">
+            <button
+              type="button"
+              onClick={handleClose}
+              disabled={uploading}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleUpload}
+              disabled={!selectedFile || uploading}
+              className="flex-1 px-4 py-2 bg-[#0A0F56] text-white rounded-lg hover:bg-[#232a7c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              {uploading ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" size={16} />
+                  Uploading...
+                </>
+              ) : (
+                'Upload Image'
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const UserProfile = () => {
   const dispatch = useAppDispatch();
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { isUpdating, isChangingPassword } = useAppSelector((state: RootState) => state.profile);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isImageUploadModalOpen, setIsImageUploadModalOpen] = useState(false);
+  const [optimisticProfileImage, setOptimisticProfileImage] = useState<string | null>(null);
+  const [isUpdatingImage, setIsUpdatingImage] = useState(false);
 
   if (!user) {
     return (
@@ -369,21 +575,38 @@ const UserProfile = () => {
     }
   };
 
-  const handleCameraClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  const handleImageUpload = async (imageUrl: string) => {
+    if (!user?.id) return;
+    
+    try {
+      console.log('🔄 Updating profile with image URL:', imageUrl);
+      console.log('👤 User ID:', user.id);
+      
+      // Optimistically update the UI immediately
+      setOptimisticProfileImage(imageUrl);
+      setIsUpdatingImage(true);
+      
+      // Call API directly to avoid global loading state
+      const result = await userService.updateUser(user.id, { profileImage: imageUrl });
+      
+      console.log('✅ Profile update result:', result);
+      
+      // Update the user data in Redux without triggering loading state
+      dispatch(updateUserData({ profileImage: imageUrl }));
+      
+      // Clear optimistic state since real data is now loaded
+      setOptimisticProfileImage(null);
+      setIsUpdatingImage(false);
+      
+      toast.success('Profile image updated successfully! 🎉');
+    } catch (error) {
+      console.error('❌ Profile update failed:', error);
+      
+      // Revert optimistic update on error
+      setOptimisticProfileImage(null);
+      setIsUpdatingImage(false);
+      
+      toast.error('Failed to update profile image. Please try again.');
     }
   };
 
@@ -426,18 +649,23 @@ const UserProfile = () => {
             <div className="bg-white rounded-3xl shadow-sm border border-gray-200 p-8 text-center">
               {/* Profile Image */}
               <div className="relative mb-6">
-                {avatarPreview ? (
-                  <img
-                    src={avatarPreview}
-                    alt={user.name}
-                    className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
-                  />
-                ) : user.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.name}
-                    className="w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg"
-                  />
+                {(optimisticProfileImage || user.profileImage) ? (
+                  <div className="relative">
+                    <img
+                      src={optimisticProfileImage || user.profileImage}
+                      alt={user.name}
+                      className={`w-32 h-32 rounded-full mx-auto object-cover border-4 border-white shadow-lg transition-opacity ${
+                        isUpdatingImage ? 'opacity-75' : 'opacity-100'
+                      }`}
+                    />
+                    {isUpdatingImage && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <div className="bg-black/50 rounded-full p-3">
+                          <FiLoader className="animate-spin w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ) : (
                   <div className="w-32 h-32 mx-auto">
                     <InitialAvatar
@@ -450,20 +678,13 @@ const UserProfile = () => {
                   </div>
                 )}
                 <button
-                  className="absolute bottom-2 right-1/2 transform translate-x-1/2 translate-y-1/2 bg-[#0A0F56] text-white p-3 rounded-full shadow-lg hover:bg-[#232a7c] transition-all"
-                  onClick={handleCameraClick}
+                  className="absolute bottom-2 right-1/2 transform translate-x-1/2 translate-y-1/2 bg-[#0A0F56] text-white p-3 rounded-full shadow-lg hover:bg-[#232a7c] transition-all disabled:opacity-50"
+                  onClick={() => setIsImageUploadModalOpen(true)}
+                  disabled={isUpdatingImage}
                   type="button"
                 >
                   <FiCamera size={16} />
                 </button>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="user"
-                  ref={fileInputRef}
-                  style={{ display: 'none' }}
-                  onChange={handleAvatarChange}
-                />
               </div>
 
               {/* Basic Info */}
@@ -559,6 +780,12 @@ const UserProfile = () => {
         onClose={() => setIsPasswordModalOpen(false)}
         onSave={handleChangePassword}
         isChangingPassword={isChangingPassword}
+      />
+
+      <ImageUploadModal
+        isOpen={isImageUploadModalOpen}
+        onClose={() => setIsImageUploadModalOpen(false)}
+        onSave={handleImageUpload}
       />
     </div>
   );
