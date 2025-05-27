@@ -12,6 +12,14 @@ interface AppointmentTableProps {
 export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments }) => {
   const navigate = useNavigate();
 
+  const handleAppointmentClick = (appointment: Appointment) => {
+    if (appointment.status === 'completed') {
+      navigate('/treatment-summary', { state: { appointment } });
+    } else {
+      navigate('/appointment-details', { state: { appointment } });
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md p-4">
       <div className="flex items-center mb-4">
@@ -40,7 +48,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
             <tr 
               key={index} 
               className="border-t border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
-              onClick={() => navigate('/appointment-details', { state: { appointment } })}
+              onClick={() => handleAppointmentClick(appointment)}
             >
               <td className="flex items-center space-x-2 p-2">
                 <InitialAvatar 

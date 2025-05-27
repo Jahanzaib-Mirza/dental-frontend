@@ -51,6 +51,17 @@ export const fetchTreatment = createAsyncThunk(
   }
 );
 
+export const fetchTreatmentByAppointment = createAsyncThunk(
+  'treatments/fetchTreatmentByAppointment',
+  async (appointmentId: string, { rejectWithValue }) => {
+    try {
+      return await treatmentService.getTreatmentByAppointment(appointmentId);
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error || 'Failed to fetch treatment by appointment');
+    }
+  }
+);
+
 export const createTreatment = createAsyncThunk(
   'treatments/createTreatment',
   async (treatmentData: CreateTreatmentData, { rejectWithValue }) => {
@@ -124,6 +135,19 @@ const treatmentsSlice = createSlice({
         state.currentTreatment = action.payload;
       })
       .addCase(fetchTreatment.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Fetch treatment by appointment
+      .addCase(fetchTreatmentByAppointment.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(fetchTreatmentByAppointment.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentTreatment = action.payload;
+      })
+      .addCase(fetchTreatmentByAppointment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
       })

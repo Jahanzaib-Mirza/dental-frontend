@@ -211,7 +211,7 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
         aiAnalysis: aiAnalysis || undefined
       });
 
-      // Reset form and close modal
+    // Reset form and close modal
       setSelectedTestId('');
       setCustomTestName('');
       setIsCustomTest(false);
@@ -255,8 +255,8 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto">
-          <form onSubmit={handleSubmit} className="p-6 space-y-5">
-            <div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Test Name</label>
               
               {/* Toggle between predefined and custom test */}
@@ -310,58 +310,58 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
                   )}
                 </div>
               ) : (
-                <input
-                  type="text"
+            <input
+              type="text"
                   value={customTestName}
                   onChange={(e) => setCustomTestName(e.target.value)}
                   placeholder="Enter custom test name..."
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
-                  required
-                />
+              required
+            />
               )}
-            </div>
+          </div>
 
-            <div>
-              <label htmlFor="result" className="block text-sm font-semibold text-gray-700 mb-1">Result / Findings</label>
-              <textarea
-                id="result"
-                value={result}
-                onChange={(e) => setResult(e.target.value)}
-                placeholder="Enter test results or findings..."
-                rows={4}
+          <div>
+            <label htmlFor="result" className="block text-sm font-semibold text-gray-700 mb-1">Result / Findings</label>
+            <textarea
+              id="result"
+              value={result}
+              onChange={(e) => setResult(e.target.value)}
+              placeholder="Enter test results or findings..."
+              rows={4}
                 className="w-full border border-gray-300 rounded-lg px-4 py-2 text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#0A0F56] resize-none"
-                required
-              />
-            </div>
+              required
+            />
+          </div>
 
-            <div>
+          <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Upload Image (Optional)</label>
               <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-[#0A0F56] transition-colors bg-gray-50">
-                <div className="space-y-1 text-center">
-                  {imagePreview ? (
+              <div className="space-y-1 text-center">
+                {imagePreview ? (
                     <div className="relative group">
-                      <img src={imagePreview} alt="Report preview" className="mx-auto h-32 w-auto rounded-md object-contain" />
-                      <button 
+                    <img src={imagePreview} alt="Report preview" className="mx-auto h-32 w-auto rounded-md object-contain" />
+                    <button 
                         type="button"
                         onClick={handleImageRemove}
                         className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <FiX size={14}/>
-                      </button>
-                    </div>
-                  ) : (
-                    <FiUpload className="mx-auto h-10 w-10 text-gray-400" />
-                  )}
-                  <div className="flex text-sm text-gray-600">
-                    <label
-                      htmlFor="report-image-upload"
-                      className="relative cursor-pointer font-semibold text-[#0A0F56] hover:text-[#232a7c] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#0A0F56] px-1"
                     >
-                      <span>Upload a file</span>
-                      <input id="report-image-upload" name="report-image-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
-                    </label>
-                    <p className="pl-1">or drag and drop</p>
+                        <FiX size={14}/>
+                    </button>
                   </div>
+                ) : (
+                  <FiUpload className="mx-auto h-10 w-10 text-gray-400" />
+                )}
+                <div className="flex text-sm text-gray-600">
+                  <label
+                    htmlFor="report-image-upload"
+                      className="relative cursor-pointer font-semibold text-[#0A0F56] hover:text-[#232a7c] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#0A0F56] px-1"
+                  >
+                    <span>Upload a file</span>
+                    <input id="report-image-upload" name="report-image-upload" type="file" className="sr-only" onChange={handleImageChange} accept="image/*" />
+                  </label>
+                  <p className="pl-1">or drag and drop</p>
+                </div>
                   <p className="text-xs text-gray-500">PNG, JPG, GIF up to 20MB</p>
                 </div>
               </div>
@@ -502,26 +502,26 @@ export const AttachReportModal: React.FC<AttachReportModalProps> = ({ isOpen, on
               </div>
             )}
           </form>
-        </div>
+          </div>
 
         {/* Fixed Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-gray-200 space-x-3 flex-shrink-0 bg-gray-50">
-          <button
-            type="button"
+            <button
+              type="button"
             onClick={handleClose}
-            className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
+              className="px-6 py-2.5 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
             form="report-form"
             onClick={handleSubmit}
             className="px-6 py-2.5 text-sm font-semibold text-white bg-[#0A0F56] hover:bg-[#232a7c] rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56] shadow-md hover:shadow-lg"
-          >
-            Attach Report
-          </button>
-        </div>
+            >
+              Attach Report
+            </button>
+          </div>
       </div>
     </div>
   );

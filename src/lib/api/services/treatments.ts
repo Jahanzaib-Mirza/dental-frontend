@@ -78,6 +78,11 @@ export const treatmentService = {
     return response.data.data;
   },
 
+  getTreatmentByAppointment: async (appointmentId: string): Promise<Treatment> => {
+    const response = await api.get(`${API_ENDPOINTS.TREATMENTS.BASE}/appointment/${appointmentId}`);
+    return response.data.data;
+  },
+
   createTreatment: async (treatmentData: CreateTreatmentData): Promise<Treatment> => {
     const response = await api.post(API_ENDPOINTS.TREATMENTS.BASE, treatmentData);
     return response.data.data;

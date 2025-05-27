@@ -10,6 +10,7 @@ import AddAppointment from '../pages/AddAppointment';
 import PatientProfile from '../pages/PatientProfile';
 import Services from '../pages/Services';
 import AppointmentDetails from '../pages/AppointmentDetails';
+import TreatmentSummary from '../pages/TreatmentSummary';
 import Expense from '../pages/Expense';
 import Invoice from '../pages/Invoice';
 import UserProfile from '../pages/UserProfile';
@@ -133,6 +134,18 @@ export const router = createBrowserRouter([
         <RoleBasedRoute requiredRoles={['owner', 'doctor']} redirectPath="/appointments">
           <DashboardWrapper>
             <AppointmentDetails />
+          </DashboardWrapper>
+        </RoleBasedRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/treatment-summary',
+    element: (
+      <ProtectedRoute>
+        <RoleBasedRoute requiredRoles={['owner', 'receptionist', 'doctor']}>
+          <DashboardWrapper>
+            <TreatmentSummary />
           </DashboardWrapper>
         </RoleBasedRoute>
       </ProtectedRoute>
