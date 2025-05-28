@@ -40,7 +40,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
             <tr 
               key={index} 
               className="border-t border-gray-200 text-gray-700 hover:bg-gray-50 cursor-pointer"
-              onClick={() => navigate('/appointment-details', { state: { appointment } })}
+              onClick={() => appointment.status === 'completed' ? navigate(`/treatments/${appointment.id}`) : navigate('/appointment-details', { state: { appointment } })}
             >
               <td className="flex items-center space-x-2 p-2">
                 <InitialAvatar 

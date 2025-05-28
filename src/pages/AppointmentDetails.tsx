@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { FiClock, FiCalendar, FiPaperclip, FiEye, FiTrash2, FiCpu } from 'react-icons/fi';
 import Select from 'react-select';
@@ -21,6 +21,7 @@ import type { ServiceUsed, TreatmentReport } from '../lib/api/services/treatment
 
 const AppointmentDetails = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const appointment = location.state?.appointment;
   const dispatch = useAppDispatch();
   
@@ -161,17 +162,25 @@ const AppointmentDetails = () => {
         ...(isFollowUpEnabled && followUpTime && { followUpTime }),
       };
 
+      let savedTreatment;
       if (existingTreatmentId) {
         // Update existing treatment
-        await dispatch(updateTreatment({
+        savedTreatment = await dispatch(updateTreatment({
           id: existingTreatmentId,
           treatmentData
         })).unwrap();
         toast.success('Treatment updated successfully!');
       } else {
         // Create new treatment
-        await dispatch(createTreatment(treatmentData)).unwrap();
+        savedTreatment = await dispatch(createTreatment(treatmentData)).unwrap();
         toast.success('Treatment created successfully!');
+      }
+
+      // Navigate to treatment details page after successful save
+      if (savedTreatment?.id) {
+        setTimeout(() => {
+          navigate(`/treatments/${savedTreatment.id}`);
+        }, 1500); // Small delay to show the success message
       }
     } catch (error) {
       // Error is handled by Redux and useEffect
