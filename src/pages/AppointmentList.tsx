@@ -40,8 +40,8 @@ const AppointmentList = () => {
 
   const appointmentStatusOptions = [
     { value: "pending", label: "Pending" },
-    { value: "confirmed", label: "Confirmed" },
-    // { value: "completed", label: "Complete" },
+    // { value: "confirmed", label: "Confirmed" },
+    { value: "completed", label: "Complete" },
     { value: "cancelled", label: "Cancelled" },
   ];
 

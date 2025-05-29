@@ -151,7 +151,7 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
             <th className="text-left p-2">Patient Name</th>
             <th className="text-left p-2">Date</th>
             <th className="text-left p-2">Time</th>
-            <th className="text-left p-2">Sex</th>
+            <th className="text-left p-2">Gender</th>
             <th className="text-left p-2">Age</th>
             <th className="text-left p-2">Disease</th>
             <th className="text-left p-2">Status</th>
@@ -175,18 +175,18 @@ export const AppointmentTable: React.FC<AppointmentTableProps> = ({ appointments
                   className="border-none shadow-none text-xs"
                 />
                 <div>
-                  <p className="font-sm">{appointment.patient?.name || 'N/A'}</p>
+                  <p className="font-sm capitalize">{appointment.patient?.name || 'N/A'}</p>
                   <p className="text-gray-500 text-xxs">{appointment.patient?.email || 'N/A'}</p>
                 </div>
               </td>
               <td className="p-2">{new Date(appointment.date).toLocaleDateString()}</td>
               <td className="p-2">{appointment.time || 'N/A'}</td>
-              <td className="p-2">{appointment.patient?.gender || 'N/A'}</td>
+              <td className="p-2 capitalize">{appointment.patient?.gender || 'N/A'}</td>
               <td className="p-2">{appointment.patient?.dob ? calculateAge(appointment.patient.dob) : 'N/A'}</td>
               <td className="p-2">{appointment.reason || 'N/A'}</td>
               <td className="p-2">
                 <span
-                  className={`px-2 py-1 text-xxs rounded-full ${appointment.status === "completed"
+                  className={`px-2 py-1 text-xxs rounded-full capitalize ${appointment.status === "completed"
                     ? "bg-green-100 text-green-700"
                     : appointment.status === "pending"
                       ? "bg-yellow-100 text-yellow-700"

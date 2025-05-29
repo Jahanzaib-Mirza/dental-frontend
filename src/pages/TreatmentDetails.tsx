@@ -6,7 +6,7 @@ import {
   FiEye, 
   FiCpu, 
   FiActivity,
-  FiPrinter,
+  // FiPrinter,
   FiChevronDown,
   FiChevronUp,
   FiLoader,
@@ -127,9 +127,9 @@ const TreatmentDetails = () => {
     }
   };
 
-  const handlePrintTreatment = () => {
-    window.print();
-  };
+  // const handlePrintTreatment = () => {
+  //   window.print();
+  // };
 
   const toggleReportExpansion = (index: number) => {
     setExpandedReports(prev => {
@@ -221,7 +221,7 @@ const TreatmentDetails = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex justify-center lg:justify-end">
+              {/* <div className="flex justify-center lg:justify-end">
                 <button
                   onClick={handlePrintTreatment}
                   className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-lg text-sm hover:bg-white/20 transition font-semibold flex items-center gap-2"
@@ -229,7 +229,7 @@ const TreatmentDetails = () => {
                   <FiPrinter />
                   Print
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

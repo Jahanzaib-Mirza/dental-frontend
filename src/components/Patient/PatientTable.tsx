@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import type { Patient } from '../../lib/api/services/patients';
 import { calculateAge } from '../../lib/utils/dateUtils';
 import { FiEdit2 } from 'react-icons/fi';
+import { getInitials } from '../../lib/utils/stringUtils';
+import InitialAvatar from '../Common/InitialAvatar';
 
 interface PatientTableProps {
   patients: Patient[];
@@ -41,17 +43,21 @@ export const PatientTable: React.FC<PatientTableProps> = ({ patients, onEdit }) 
               onClick={() => navigate(`/patient-profile/${patient.id}`)}
             >
               <td className="flex items-center space-x-2 p-2">
-                <div className="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center">
-                  {patient.name.charAt(0)}
-                </div>
+              <InitialAvatar
+                  initials={getInitials(patient.name || '')}
+                  size={8}
+                  bgColor="bg-blue-500"
+                  textColor="text-white"
+                  className="border-none shadow-none text-xs"
+                />
                 <div>
-                  <p>{patient.name}</p>
+                  <p className='capitalize'>{patient.name}</p>
                   <p className="text-gray-500 text-xxs">{patient.email}</p>
                 </div>
               </td>
               <td className="p-2">{patient.email}</td>
               <td className="p-2">{patient.phone}</td>
-              <td className="p-2">{patient.gender}</td>
+              <td className="p-2 capitalize">{patient.gender}</td>
               <td className="p-2">{calculateAge(patient.dob)}</td>
               <td className="p-2">{patient.address}</td>
               <td className="p-2 flex space-x-2">

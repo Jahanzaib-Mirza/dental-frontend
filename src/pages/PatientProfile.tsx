@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiActivity, FiDollarSign, FiLoader, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiActivity, FiDollarSign, FiLoader, FiChevronDown, FiChevronUp, FiExternalLink } from 'react-icons/fi';
 import InitialAvatar from '../components/Common/InitialAvatar';
 import { getInitials } from '../lib/utils/stringUtils';
 import { calculateAge } from '../lib/utils/dateUtils';
@@ -110,6 +110,10 @@ const PatientProfile = () => {
       }
       return newSet;
     });
+  };
+
+  const handleNavigateToTreatment = (treatmentId: string) => {
+    navigate(`/treatments/${treatmentId}`);
   };
 
   return (
@@ -365,18 +369,31 @@ const PatientProfile = () => {
                               </div>
                             </div>
 
-                            {/* Toggle Button */}
-                            <button
-                              onClick={() => toggleCardExpansion(treatment.id)}
-                              className="ml-4 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
-                              aria-label={isExpanded ? "Collapse details" : "Expand details"}
-                            >
-                              {isExpanded ? (
-                                <FiChevronUp className="w-5 h-5 text-gray-500" />
-                              ) : (
-                                <FiChevronDown className="w-5 h-5 text-gray-500" />
-                              )}
-                            </button>
+                            {/* Action Buttons */}
+                            <div className="flex items-center ml-4">
+                              {/* Jump to Treatment Details Button */}
+                              <button
+                                onClick={() => handleNavigateToTreatment(treatment.appointmentId)}
+                                className="p-2 rounded-lg hover:bg-blue-100 transition-colors flex-shrink-0 group"
+                                title="View Treatment Details"
+                                aria-label="View detailed treatment information"
+                              >
+                                <FiExternalLink className="w-5 h-5 text-blue-500 group-hover:text-blue-600" />
+                              </button>
+
+                              {/* Toggle Button */}
+                              <button
+                                onClick={() => toggleCardExpansion(treatment.id)}
+                                className="ml-1 p-2 rounded-lg hover:bg-gray-100 transition-colors flex-shrink-0"
+                                aria-label={isExpanded ? "Collapse details" : "Expand details"}
+                              >
+                                {isExpanded ? (
+                                  <FiChevronUp className="w-5 h-5 text-gray-500" />
+                                ) : (
+                                  <FiChevronDown className="w-5 h-5 text-gray-500" />
+                                )}
+                              </button>
+                            </div>
                           </div>
 
                           {/* Expandable Content */}

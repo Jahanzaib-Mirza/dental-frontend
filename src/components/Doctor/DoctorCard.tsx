@@ -40,7 +40,7 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div>
-              <div className="font-semibold text-gray-900 text-lg">{doctor.name}</div>
+              <div className="font-semibold text-gray-900 text-lg capitalize">{doctor.name}</div>
               <div className="text-xs text-indigo-700 font-medium mb-1">{doctor.specialization || 'General Dentist'}</div>
               <div className="text-xs text-gray-500">
                 {doctor.availability?.length ? 'Available' : 'Not available'} 
@@ -49,7 +49,7 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
               <div className="text-xs text-gray-500 mt-1">
                 {doctor.education || 'Professional dental care provider'}
               </div>
-              <div className="text-xs text-gray-500 mt-1">
+              <div className="text-xs text-gray-500 mt-1 capitalize">
                 {doctor.gender || 'Not specified'} • {doctor.age || 0} years • {doctor.experience || 0} years experience
               </div>
             </div>
