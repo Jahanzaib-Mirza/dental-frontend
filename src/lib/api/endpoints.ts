@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     BASE: `${BASE_URL}/api/appointments`,
     AVAILABLE_SLOTS: `${BASE_URL}/api/appointments/available-slots`,
     BY_ID: (id: string) => `${BASE_URL}/api/appointments/${id}`,
+    CANCEL: (id: string) => `${BASE_URL}/api/appointments/${id}/cancel`,
   },
 
   SERVICES: {
@@ -47,5 +48,12 @@ export const API_ENDPOINTS = {
   INVOICES: {
     BASE: `${BASE_URL}/api/invoices`,
     MARK_PAID: (id: string) => `${BASE_URL}/api/invoices/${id}/mark-paid`,
+  },
+
+  // Expense endpoints
+  EXPENSES: {
+    BASE: `${BASE_URL}/api/expenses`,
+    BY_ID: (id: string) => `${BASE_URL}/api/expenses/${id}`,
+    SUMMARY: `${BASE_URL}/api/expenses/summary`,
   },
 } as const; 

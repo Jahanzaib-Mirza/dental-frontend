@@ -9,6 +9,8 @@ interface AppointmentsState {
   createError: string | null;
   isUpdating: boolean;
   updateError: string | null;
+  isCancelling: boolean;
+  cancelError: string | null;
 }
 
 const initialState: AppointmentsState = {
@@ -19,6 +21,8 @@ const initialState: AppointmentsState = {
   createError: null,
   isUpdating: false,
   updateError: null,
+  isCancelling: false,
+  cancelError: null,
 };
 
 export const fetchAppointments = createAsyncThunk(
@@ -69,6 +73,18 @@ export const getAppointment = createAsyncThunk(
   }
 );
 
+export const cancelAppointment = createAsyncThunk(
+  'appointments/cancelAppointment',
+  async (id: string, { rejectWithValue }) => {
+    try {
+      const response = await appointmentService.cancelAppointment(id);
+      return { ...response, appointmentId: id };
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to cancel appointment');
+    }
+  }
+);
+
 const appointmentsSlice = createSlice({
   name: 'appointments',
   initialState,
@@ -77,6 +93,7 @@ const appointmentsSlice = createSlice({
       state.error = null;
       state.createError = null;
       state.updateError = null;
+      state.cancelError = null;
     },
   },
   extraReducers: (builder) => {
@@ -140,6 +157,29 @@ const appointmentsSlice = createSlice({
       .addCase(getAppointment.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
+      })
+      // Cancel Appointment
+      .addCase(cancelAppointment.pending, (state) => {
+        state.isCancelling = true;
+        state.cancelError = null;
+      })
+      .addCase(cancelAppointment.fulfilled, (state, action) => {
+        state.isCancelling = false;
+        const appointmentId = action.payload.appointmentId || action.payload.id;
+        const index = state.appointments.findIndex(appointment => appointment.id === appointmentId);
+        if (index !== -1) {
+          // If the response contains the full updated appointment, use it
+          if (action.payload.id && action.payload.status) {
+            state.appointments[index] = action.payload;
+          } else {
+            // Otherwise, just update the status to cancelled
+            state.appointments[index].status = 'cancelled';
+          }
+        }
+      })
+      .addCase(cancelAppointment.rejected, (state, action) => {
+        state.isCancelling = false;
+        state.cancelError = action.payload as string;
       });
   },
 });

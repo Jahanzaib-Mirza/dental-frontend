@@ -8,8 +8,9 @@ import toast from 'react-hot-toast';
 
 export default function Invoice() {
   const dispatch = useAppDispatch();
-  const { invoices, isLoading, error, isMarkingPaid } = useAppSelector((state: RootState) => state.invoices);
+  const { invoices, isLoading, error } = useAppSelector((state: RootState) => state.invoices);
   const [searchTerm, setSearchTerm] = useState('');
+  const [processingInvoiceId, setProcessingInvoiceId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchInvoices());
@@ -39,10 +40,13 @@ export default function Invoice() {
 
   const handleMarkAsPaid = async (invoiceId: string) => {
     try {
+      setProcessingInvoiceId(invoiceId);
       await dispatch(markInvoiceAsPaid(invoiceId)).unwrap();
       toast.success('Invoice marked as paid successfully!');
     } catch (err) {
       toast.error(err as string || 'Failed to mark invoice as paid');
+    } finally {
+      setProcessingInvoiceId(null);
     }
   };
 
@@ -203,18 +207,18 @@ export default function Invoice() {
                         {invoice.status !== 'paid' && (
                           <button
                             onClick={() => handleMarkAsPaid(invoice.id)}
-                            disabled={isMarkingPaid && invoice.id === (dispatch(markInvoiceAsPaid(invoice.id) as any)?.arg)}
+                            disabled={processingInvoiceId === invoice.id}
                             className="text-green-500 hover:text-green-700 disabled:opacity-50 disabled:cursor-not-allowed p-1"
                             title="Mark as Paid"
                           >
-                            {(isMarkingPaid && invoice.id === (dispatch(markInvoiceAsPaid(invoice.id) as any)?.arg)) ? (
+                            {processingInvoiceId === invoice.id ? (
                               <FiLoader className="w-4 h-4 animate-spin" />
                             ) : (
                               <FiCheck className="w-4 h-4" />
                             )}
                           </button>
                         )}
-                        <button className="text-blue-500 hover:text-blue-700 p-1" title="Edit">
+                        {/* <button className="text-blue-500 hover:text-blue-700 p-1" title="Edit">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                           </svg>
@@ -223,7 +227,7 @@ export default function Invoice() {
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 15v4c0 1.1.9 2 2 2h14a2 2 0 002-2v-4M17 8l-5-5-5 5M12 4.2v10.3" />
                           </svg>
-                        </button>
+                        </button> */}
                       </div>
                     </div>
                   ))}

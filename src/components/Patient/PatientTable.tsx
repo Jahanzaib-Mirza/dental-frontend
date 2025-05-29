@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Patient } from '../../lib/api/services/patients';
 import { calculateAge } from '../../lib/utils/dateUtils';
+import { FiEdit2 } from 'react-icons/fi';
 
 interface PatientTableProps {
   patients: Patient[];
@@ -54,29 +55,21 @@ export const PatientTable: React.FC<PatientTableProps> = ({ patients, onEdit }) 
               <td className="p-2">{calculateAge(patient.dob)}</td>
               <td className="p-2">{patient.address}</td>
               <td className="p-2 flex space-x-2">
-                <button 
-                  className="text-gray-400 hover:text-blue-500 text-xxs"
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
                     onEdit(patient);
                   }}
+                  className="text-blue-600 hover:text-blue-900 bg-blue-100 p-2 rounded-lg"
+                  title="Edit appointment"
                 >
-                  ✏️
-                </button>
-                <button 
-                  className="text-gray-400 hover:text-red-500 text-xxs"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle delete
-                  }}
-                >
-                  🗑️
+                  <FiEdit2 className="w-4 h-4" />
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </div >
   );
 }; 

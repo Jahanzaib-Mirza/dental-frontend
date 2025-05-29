@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Select from 'react-select';
 import { AddPatientModal } from '../components/Patient/AddPatientModal';
 import { FiUser, FiCalendar, FiFileText, FiPlus } from 'react-icons/fi';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
-import { createAppointment } from '../lib/store/slices/appointmentsSlice';
+import { createAppointment, updateAppointment, clearAppointmentErrors } from '../lib/store/slices/appointmentsSlice';
 import { fetchPatients } from '../lib/store/slices/patientsSlice';
 import { fetchDoctors } from '../lib/store/slices/doctorsSlice';
 import { toast } from 'react-hot-toast';
 import type { RootState } from '../lib/store/store';
-import type { CreateAppointmentData } from '../lib/api/services/appointments';
+import type { CreateAppointmentData, Appointment } from '../lib/api/services/appointments';
 import type { Patient } from '../lib/api/services/patients';
 import type { User } from '../lib/api/services/users';
 import { appointmentService } from '../lib/api/services/appointments';
@@ -18,12 +18,17 @@ import { appointmentService } from '../lib/api/services/appointments';
 
 const AddAppointment = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useAppDispatch();
   const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  const { isCreating, createError } = useAppSelector((state: RootState) => state.appointments);
+  // Check if we're in edit mode
+  const isEditing = location.state?.isEditing || false;
+  const editingAppointment = location.state?.appointment as Appointment | undefined;
+
+  const { isCreating, isUpdating, createError, updateError } = useAppSelector((state: RootState) => state.appointments);
   const { patients } = useAppSelector((state: RootState) => state.patients);
   const { doctors } = useAppSelector((state: RootState) => state.doctors);
   const user = useAppSelector((state: RootState) => state.auth.user);
@@ -31,6 +36,10 @@ const AddAppointment = () => {
   // Get user role directly from Redux state to avoid function dependency issues
   const userRole = user?.role;
   const isDoctorRole = userRole === 'doctor';
+
+  // Get the appropriate loading and error states based on mode
+  const isSubmitting = isEditing ? isUpdating : isCreating;
+  const submitError = isEditing ? updateError : createError;
 
   const [formData, setFormData] = useState({
     patientId: '',
@@ -64,9 +73,22 @@ const AddAppointment = () => {
         setIsLoadingSlots(true);
         try {
           const response = await appointmentService.getAvailableSlots(formData.appointmentDate, formData.doctorId);
-          setAvailableSlots(response.availableSlots);
+          let slots = response.availableSlots;
+          
+          // If we're editing and the current appointment time is not in available slots, add it
+          if (isEditing && editingAppointment && formData.appointmentTime && 
+              !slots.includes(formData.appointmentTime)) {
+            slots = [...slots, formData.appointmentTime].sort();
+          }
+          
+          setAvailableSlots(slots);
         } catch (error: any) {
           toast.error(error.response?.data?.message || 'Failed to fetch available slots');
+          
+          // If fetching fails and we're editing, at least show the current time
+          if (isEditing && editingAppointment && formData.appointmentTime) {
+            setAvailableSlots([formData.appointmentTime]);
+          }
         } finally {
           setIsLoadingSlots(false);
         }
@@ -76,7 +98,7 @@ const AddAppointment = () => {
     };
 
     fetchSlots();
-  }, [formData.appointmentDate, formData.doctorId]);
+  }, [formData.appointmentDate, formData.doctorId, isEditing, editingAppointment, formData.appointmentTime]);
 
   const getMinDate = () => {
     const today = new Date();
@@ -119,11 +141,20 @@ const AddAppointment = () => {
         doctorId: formData.doctorId,
       };
 
-      await dispatch(createAppointment(appointmentData)).unwrap();
-      toast.success('Appointment created successfully');
+      if (isEditing && editingAppointment) {
+        await dispatch(updateAppointment({
+          id: editingAppointment.id,
+          appointmentData
+        })).unwrap();
+        toast.success('Appointment updated successfully');
+      } else {
+        await dispatch(createAppointment(appointmentData)).unwrap();
+        toast.success('Appointment created successfully');
+      }
+      
       navigate('/appointments');
     } catch (error: any) {
-      toast.error(error || 'Failed to create appointment');
+      toast.error(error || `Failed to ${isEditing ? 'update' : 'create'} appointment`);
     }
   };
 
@@ -145,6 +176,41 @@ const AddAppointment = () => {
     }
   };
 
+  useEffect(() => {
+    if (location.state && location.state.appointment) {
+      const appointment = location.state.appointment as Appointment;
+      // Format date for input field (YYYY-MM-DD)
+      const formattedDate = appointment.date.includes('T') 
+        ? appointment.date.split('T')[0] 
+        : new Date(appointment.date).toISOString().split('T')[0];
+      
+      setFormData({
+        patientId: appointment.patient.id,
+        doctorId: appointment.doctor.id,
+        appointmentDate: formattedDate,
+        appointmentTime: appointment.time,
+        reason: appointment.reason,
+        notes: appointment.notes || '',
+      });
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    dispatch(clearAppointmentErrors());
+  }, [dispatch]);
+
+  // Compute available slots to always include current appointment time when editing
+  const displayAvailableSlots = React.useMemo(() => {
+    let slots = [...availableSlots];
+    
+    // Always include the current appointment time when editing
+    if (isEditing && formData.appointmentTime && !slots.includes(formData.appointmentTime)) {
+      slots = [...slots, formData.appointmentTime].sort();
+    }
+    
+    return slots;
+  }, [availableSlots, isEditing, formData.appointmentTime]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] py-3 px-4 sm:px-6 flex flex-col items-center">
       <div className="w-full max-w-5xl">
@@ -152,13 +218,15 @@ const AddAppointment = () => {
           <div className="bg-white rounded-3xl border border-[#E0E3F0] overflow-hidden">
             {/* Header Section */}
             <div className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] px-8 py-2">
-              <h1 className="text-2xl font-bold text-white text-center">Schedule New Appointment</h1>
+              <h1 className="text-2xl font-bold text-white text-center">
+                {isEditing ? 'Edit Appointment' : 'Schedule New Appointment'}
+              </h1>
               {/* <p className="text-center text-blue-100 mt-1">Fill in the details below to create a new appointment</p> */}
             </div>
 
-            {createError && (
+            {submitError && (
               <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative m-4" role="alert">
-                <span className="block sm:inline">{createError}</span>
+                <span className="block sm:inline">{submitError}</span>
               </div>
             )}
 
@@ -284,7 +352,7 @@ const AddAppointment = () => {
                                 onChange={handleChange}
                                 min={getMinDate()}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
-                                disabled={!formData.patientId || !formData.doctorId}
+                                disabled={(!formData.patientId || !formData.doctorId) && !isEditing}
                               />
                             </div>
                             <div className="relative">
@@ -293,10 +361,10 @@ const AddAppointment = () => {
                                 value={formData.appointmentTime}
                                 onChange={handleChange}
                                 className="w-full bg-white border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#0A0F56] focus:border-transparent transition-all"
-                                disabled={isLoadingSlots}
+                                disabled={isLoadingSlots || (displayAvailableSlots.length === 0 && !isEditing)}
                               >
                                 <option value="">Select Time</option>
-                                {availableSlots.map((slot: string) => (
+                                {displayAvailableSlots.map((slot: string) => (
                                   <option key={slot} value={slot}>
                                     {slot}
                                   </option>
@@ -350,13 +418,16 @@ const AddAppointment = () => {
               <div className="mt-4 py-2">
                 <button
                   type="submit"
-                  disabled={isCreating}
+                  disabled={isSubmitting}
                   className={`w-full bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white py-4 rounded-xl text-lg font-semibold hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                    isCreating ? 'opacity-50 cursor-not-allowed' : ''
+                    isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
-                  {isCreating ? 'Scheduling...' : 'Schedule Appointment'}
-                  {!isCreating && <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>}
+                  {isSubmitting ? 
+                    (isEditing ? 'Updating...' : 'Scheduling...') : 
+                    (isEditing ? 'Update Appointment' : 'Schedule Appointment')
+                  }
+                  {!isSubmitting && <span className="ml-2 group-hover:translate-x-1 transition-transform">→</span>}
                 </button>
               </div>
             </div>

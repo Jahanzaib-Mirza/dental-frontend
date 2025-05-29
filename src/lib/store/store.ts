@@ -7,6 +7,7 @@ import servicesReducer from './slices/servicesSlice';
 import treatmentsReducer from './slices/treatmentsSlice';
 import profileReducer from './slices/profileSlice';
 import invoicesReducer from './slices/invoicesSlice';
+import expensesReducer from './slices/expensesSlice';
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -17,6 +18,7 @@ const rootReducer = combineReducers({
   treatments: treatmentsReducer,
   profile: profileReducer,
   invoices: invoicesReducer,
+  expenses: expensesReducer,
 });
 
 // Create a wrapper reducer that can reset the entire state

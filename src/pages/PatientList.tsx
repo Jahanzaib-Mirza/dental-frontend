@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaPlus } from "react-icons/fa";
 import { PatientTable } from '../components/Patient/PatientTable';
-import { Pagination } from '../components/Common/Pagination';
+// import { Pagination } from '../components/Common/Pagination';
 import { AddPatientModal } from '../components/Patient/AddPatientModal';
 import { EditPatientModal } from '../components/Patient/EditPatientModal';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
@@ -12,7 +12,7 @@ import { toast } from 'react-hot-toast';
 
 const PatientList = () => {
     const dispatch = useAppDispatch();
-    const [currentPage, setCurrentPage] = useState(1);
+    // const [currentPage, setCurrentPage] = useState(1);
     const [searchTerm, setSearchTerm] = useState("");
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -133,11 +133,11 @@ const PatientList = () => {
                         onEdit={handleEditClick}
                     />
 
-                    <Pagination
+                    {/* <Pagination
                         currentPage={currentPage}
                         totalPages={Math.ceil(filteredPatients.length / 10)}
                         onPageChange={setCurrentPage}
-                    />
+                    /> */}
                 </>
             )}
 

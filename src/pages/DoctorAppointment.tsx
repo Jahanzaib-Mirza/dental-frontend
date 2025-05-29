@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { DoctorList } from '../components/Doctor/DoctorList';
-import { DoctorPagination } from '../components/Doctor/DoctorPagination';
+// import { DoctorPagination } from '../components/Doctor/DoctorPagination';
 import { AddDoctorModal } from '../components/Doctor/AddDoctorModal';
 import type { DoctorFormData } from '../components/Doctor/AddDoctorModal';
 import { FaPlus } from 'react-icons/fa';
@@ -41,10 +41,10 @@ export default function DoctorAppointment() {
         </button>
       </div>
       <div className="mb-4 text-sm text-gray-500">
-        <span className="font-semibold text-gray-700">Showing:</span> All Consultations of All Healthcare Providers
+        <span className="font-semibold text-gray-700">Showing:</span>All Healthcare Providers
       </div>
       <DoctorList />
-      <DoctorPagination />
+      {/* <DoctorPagination /> */}
 
       <AddDoctorModal
         isOpen={isModalOpen}

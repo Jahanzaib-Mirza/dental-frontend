@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Select from 'react-select';
 import { FaPlus, FaFilter, FaSearch } from "react-icons/fa";
 import { AppointmentTable } from "../components/Appointment/AppointmentTable";
-import { Pagination } from "../components/Common/Pagination";
+// import { Pagination } from "../components/Common/Pagination";
 import { useAppDispatch, useAppSelector } from "../lib/hooks";
 import { fetchAppointments } from "../lib/store/slices/appointmentsSlice";
 import { fetchDoctors } from "../lib/store/slices/doctorsSlice";
@@ -17,7 +17,7 @@ const AppointmentList = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDoctorId, setSelectedDoctorId] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
@@ -41,7 +41,7 @@ const AppointmentList = () => {
   const appointmentStatusOptions = [
     { value: "pending", label: "Pending" },
     { value: "confirmed", label: "Confirmed" },
-    { value: "complete", label: "Complete" },
+    // { value: "completed", label: "Complete" },
     { value: "cancelled", label: "Cancelled" },
   ];
 
@@ -199,11 +199,11 @@ const AppointmentList = () => {
 
       <AppointmentTable appointments={filteredAppointments} />
 
-      <Pagination
+      {/* <Pagination
         currentPage={currentPage}
         totalPages={10}
         onPageChange={setCurrentPage}
-      />
+      /> */}
     </div>
   );
 };

@@ -60,5 +60,10 @@ export const appointmentService = {
     updateAppointment: async (id: string, data: Partial<CreateAppointmentData>) => {
         const response = await api.put(API_ENDPOINTS.APPOINTMENTS.BY_ID(id), data);
         return response.data;
+    },
+
+    cancelAppointment: async (id: string) => {
+        const response = await api.put(API_ENDPOINTS.APPOINTMENTS.CANCEL(id));
+        return response.data;
     }
 }; 

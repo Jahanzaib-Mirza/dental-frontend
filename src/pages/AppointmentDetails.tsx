@@ -14,7 +14,7 @@ import { MedicineInput } from '../components/Medicine/MedicineInput';
 import type { Medicine } from '../components/Medicine/MedicineInput';
 import { useAppDispatch, useAppSelector } from '../lib/hooks';
 import { fetchServices } from '../lib/store/slices/servicesSlice';
-import { createTreatment, updateTreatment, fetchTreatment, clearTreatmentErrors } from '../lib/store/slices/treatmentsSlice';
+import { createTreatment, updateTreatment, fetchTreatment, clearTreatmentErrors, clearCurrentTreatment } from '../lib/store/slices/treatmentsSlice';
 import type { RootState } from '../lib/store/store';
 import type { ServiceUsed, TreatmentReport } from '../lib/api/services/treatments';
 // import { cloudinaryUploadService } from '../lib/services/cloudinaryUpload';
@@ -57,6 +57,24 @@ const AppointmentDetails = () => {
 
   // Treatment state
   const [existingTreatmentId, setExistingTreatmentId] = useState<string | null>(null);
+
+  // Reset form state when appointment changes
+  useEffect(() => {
+    // Clear all form state when appointment changes
+    setDiagnosis('');
+    setReviewNotes('');
+    setSelectedServices([]);
+    setMedicines([]);
+    setIsFollowUpEnabled(false);
+    setFollowUpDate('');
+    setFollowUpTime('');
+    setFollowUpAvailableSlots([]);
+    setAttachedReports([]);
+    setExistingTreatmentId(null);
+    
+    // Clear Redux treatment state
+    dispatch(clearCurrentTreatment());
+  }, [appointment?.id, dispatch]);
 
   // Convert services to select options
   const serviceOptions = services.map(service => ({
@@ -179,7 +197,7 @@ const AppointmentDetails = () => {
       // Navigate to treatment details page after successful save
       if (savedTreatment?.id) {
         setTimeout(() => {
-          navigate(`/treatments/${savedTreatment.id}`);
+          navigate(`/treatments/${savedTreatment.appointment}`);
         }, 1500); // Small delay to show the success message
       }
     } catch (error) {
