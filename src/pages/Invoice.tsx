@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiSearch, FiFilter, FiCheck, FiLoader } from 'react-icons/fi';
+import { FiSearch, FiFilter, FiCheck, FiLoader, FiChevronDown } from 'react-icons/fi';
 import { useAppSelector, useAppDispatch } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
 import { fetchInvoices, markInvoiceAsPaid } from '../lib/store/slices/invoicesSlice';
@@ -10,11 +10,30 @@ export default function Invoice() {
   const dispatch = useAppDispatch();
   const { invoices, isLoading, error } = useAppSelector((state: RootState) => state.invoices);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'due'>('all');
+  const [isFilterDropdownOpen, setIsFilterDropdownOpen] = useState(false);
   const [processingInvoiceId, setProcessingInvoiceId] = useState<string | null>(null);
 
   useEffect(() => {
     dispatch(fetchInvoices());
   }, [dispatch]);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.filter-dropdown')) {
+        setIsFilterDropdownOpen(false);
+      }
+    };
+
+    if (isFilterDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isFilterDropdownOpen]);
 
     // Calculate stats from real data
   const calculateStats = () => {
@@ -50,12 +69,33 @@ export default function Invoice() {
     }
   };
 
-  // Filter invoices based on search term
-  const filteredInvoices = invoices.filter(invoice =>
-    invoice?.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice?.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    invoice?.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter invoices based on search term and status
+  const filteredInvoices = invoices.filter(invoice => {
+    const matchesSearch = invoice?.patient?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice?.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice?.invoiceNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'paid' && invoice.status === 'paid') ||
+      (statusFilter === 'due' && (invoice.status === 'due' || invoice.status === 'overdue'));
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const getFilterButtonText = () => {
+    switch (statusFilter) {
+      case 'paid': return 'Paid';
+      case 'due': return 'Due';
+      default: return 'All';
+    }
+  };
+
+  const getFilterCount = (filter: 'all' | 'paid' | 'due') => {
+    if (filter === 'all') return invoices.length;
+    if (filter === 'paid') return invoices.filter(inv => inv.status === 'paid').length;
+    if (filter === 'due') return invoices.filter(inv => inv.status === 'due' || inv.status === 'overdue').length;
+    return 0;
+  };
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -151,10 +191,64 @@ export default function Invoice() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="flex items-center justify-center bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow w-full sm:w-auto">
-              <span>All</span>
-              <FiFilter className="w-4 h-4 ml-2" />
-            </button>
+            <div className="relative w-full sm:w-auto filter-dropdown">
+              <button 
+                onClick={() => setIsFilterDropdownOpen(!isFilterDropdownOpen)}
+                className="flex items-center justify-center bg-[#0A0F56] text-white text-sm rounded-lg px-4 py-2 hover:bg-[#090D45] shadow w-full sm:w-auto"
+              >
+                <span>{getFilterButtonText()}</span>
+                <FiChevronDown className={`w-4 h-4 ml-2 transition-transform ${isFilterDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {isFilterDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <div className="py-2">
+                    <button
+                      onClick={() => {
+                        setStatusFilter('all');
+                        setIsFilterDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                        statusFilter === 'all' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <span>All Invoices</span>
+                      <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">
+                        {getFilterCount('all')}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setStatusFilter('paid');
+                        setIsFilterDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                        statusFilter === 'paid' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <span>Paid</span>
+                      <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                        {getFilterCount('paid')}
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setStatusFilter('due');
+                        setIsFilterDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center justify-between ${
+                        statusFilter === 'due' ? 'bg-blue-50 text-blue-600' : 'text-gray-700'
+                      }`}
+                    >
+                      <span>Due</span>
+                      <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
+                        {getFilterCount('due')}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -168,8 +262,22 @@ export default function Invoice() {
           ) : filteredInvoices.length === 0 ? (
             <div className="text-center py-12">
               <FiSearch className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-500 text-lg">No invoices found</p>
-              {searchTerm && <p className="text-gray-400 text-sm">Try adjusting your search term.</p>}
+              <p className="text-gray-500 text-lg">
+                {searchTerm || statusFilter !== 'all' ? 'No invoices found' : 'No invoices found'}
+              </p>
+              {searchTerm && (
+                <p className="text-gray-400 text-sm">Try adjusting your search term.</p>
+              )}
+              {statusFilter !== 'all' && !searchTerm && (
+                <p className="text-gray-400 text-sm">
+                  No {statusFilter} invoices found. Try changing the filter.
+                </p>
+              )}
+              {searchTerm && statusFilter !== 'all' && (
+                <p className="text-gray-400 text-sm">
+                  Try adjusting your search term or changing the filter.
+                </p>
+              )}
             </div>
           ) : (
             <div className="overflow-x-auto">
