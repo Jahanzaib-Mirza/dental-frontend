@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FiSearch, FiFilter, FiCheck, FiLoader, FiChevronDown } from 'react-icons/fi';
+import { FiSearch, FiCheck, FiLoader, FiChevronDown } from 'react-icons/fi';
 import { useAppSelector, useAppDispatch } from '../lib/hooks';
 import type { RootState } from '../lib/store/store';
 import { fetchInvoices, markInvoiceAsPaid } from '../lib/store/slices/invoicesSlice';
