@@ -283,7 +283,7 @@ export default function Invoice() {
             <div className="overflow-x-auto">
               <div className="min-w-[700px]">
                 {/* Header */}
-                <div className="bg-gray-50 grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_0.75fr_0.75fr] gap-x-4 px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
+                <div className="bg-gray-50 grid grid-cols-[minmax(120px,1.5fr)_minmax(120px,1.5fr)_minmax(180px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,0.75fr)_minmax(80px,0.75fr)] gap-x-4 px-5 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200">
                   <div className="text-left">Invoice #</div>
                   <div className="text-left">Patient</div>
                   <div className="text-left">Services</div>
@@ -296,12 +296,27 @@ export default function Invoice() {
                 {/* Body */}
                 <div className="bg-white divide-y divide-gray-200">
                   {filteredInvoices.map((invoice) => (
-                    <div key={invoice.id} className="grid grid-cols-[1.5fr_1.5fr_2fr_1fr_1fr_0.75fr_0.75fr] gap-x-4 px-5 py-4 hover:bg-gray-50 items-center text-sm">
+                    <div key={invoice.id} className="grid grid-cols-[minmax(120px,1.5fr)_minmax(120px,1.5fr)_minmax(180px,2fr)_minmax(100px,1fr)_minmax(100px,1fr)_minmax(80px,0.75fr)_minmax(80px,0.75fr)] gap-x-4 px-5 py-4 hover:bg-gray-50 items-center text-sm">
                       <div className="text-blue-600 truncate">{invoice.invoiceNumber}</div>
                       <div className="text-gray-900 truncate">{invoice?.patient?.name || 'N/A'}</div>
                       <div className="text-gray-600">
-                        <div className="truncate" title={invoice?.services?.map(service => service.name).join(', ')}>
-                          {invoice?.services?.map(service => service.name).join(', ') || 'No services'}
+                        <div 
+                          className="truncate" 
+                          title={invoice?.services?.map(service => service.name).join(', ') || 'No services'}
+                        >
+                          {(() => {
+                            const services = invoice?.services || [];
+                            if (services.length === 0) return 'No services';
+                            
+                            // Show max 2 services, then "+" indicator
+                            if (services.length <= 2) {
+                              return services.map(service => service.name).join(', ');
+                            } else {
+                              const firstTwo = services.slice(0, 2).map(service => service.name).join(', ');
+                              const remaining = services.length - 2;
+                              return `${firstTwo} +${remaining} more`;
+                            }
+                          })()}
                         </div>
                       </div>
                       <div className="text-gray-600 truncate">{formatDate(invoice?.createdAt)}</div>
