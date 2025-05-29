@@ -32,7 +32,7 @@ export const fetchAppointments = createAsyncThunk(
       const response = await appointmentService.getAppointments();
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch appointments');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch appointments');
     }
   }
 );
@@ -44,7 +44,7 @@ export const createAppointment = createAsyncThunk(
       const response = await appointmentService.createAppointment(appointmentData);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create appointment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to create appointment');
     }
   }
 );
@@ -56,7 +56,7 @@ export const updateAppointment = createAsyncThunk(
       const response = await appointmentService.updateAppointment(id, appointmentData);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update appointment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to update appointment');
     }
   }
 );
@@ -68,7 +68,7 @@ export const getAppointment = createAsyncThunk(
       const response = await appointmentService.getAppointment(id);
       return response;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch appointment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch appointment');
     }
   }
 );
@@ -80,7 +80,7 @@ export const cancelAppointment = createAsyncThunk(
       const response = await appointmentService.cancelAppointment(id);
       return { ...response, appointmentId: id };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to cancel appointment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to cancel appointment');
     }
   }
 );

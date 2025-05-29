@@ -35,7 +35,7 @@ export const fetchTreatments = createAsyncThunk(
     try {
       return await treatmentService.getTreatments();
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch treatments');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to fetch treatments');
     }
   }
 );
@@ -46,7 +46,7 @@ export const fetchTreatment = createAsyncThunk(
     try {
       return await treatmentService.getTreatment(id);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch treatment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to fetch treatment');
     }
   }
 );
@@ -57,7 +57,7 @@ export const createTreatment = createAsyncThunk(
     try {
       return await treatmentService.createTreatment(treatmentData);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create treatment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to create treatment');
     }
   }
 );
@@ -68,7 +68,7 @@ export const updateTreatment = createAsyncThunk(
     try {
       return await treatmentService.updateTreatment(id, treatmentData);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update treatment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to update treatment');
     }
   }
 );
@@ -80,7 +80,7 @@ export const deleteTreatment = createAsyncThunk(
       await treatmentService.deleteTreatment(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete treatment');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to delete treatment');
     }
   }
 );

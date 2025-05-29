@@ -13,6 +13,7 @@ import type { CreateAppointmentData, Appointment } from '../lib/api/services/app
 import type { Patient } from '../lib/api/services/patients';
 import type { User } from '../lib/api/services/users';
 import { appointmentService } from '../lib/api/services/appointments';
+import { createPatient } from '../lib/store/slices/patientsSlice';
 
 
 
@@ -160,13 +161,16 @@ const AddAppointment = () => {
 
   const handleAddPatient = async (patientData: any) => {
     try {
-      // Refresh the patients list
+      // First create the patient
+      const newPatient = await dispatch(createPatient(patientData)).unwrap();
+      
+      // Refresh the patients list to make sure we have the latest data
       await dispatch(fetchPatients()).unwrap();
       
       // Set the newly added patient as selected
       setFormData(prev => ({
         ...prev,
-        patientId: patientData.id
+        patientId: newPatient.id
       }));
       
       setIsPatientModalOpen(false);

@@ -19,6 +19,10 @@ const PatientList = () => {
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
     const { patients, isLoading, error, isCreating, isUpdating } = useAppSelector((state: RootState) => state.patients);
+    const user = useAppSelector((state: RootState) => state.auth.user);
+    
+    // Check if user is doctor
+    const isDoctorRole = user?.role === 'doctor';
 
     useEffect(() => {
         dispatch(fetchPatients());
@@ -84,9 +88,15 @@ const PatientList = () => {
                         />
                     </div>
                     <button
-                        onClick={() => setIsAddModalOpen(true)}
-                        className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                        disabled={isCreating}
+                        type="button"
+                        onClick={() => !isDoctorRole && setIsAddModalOpen(true)}
+                        className={`px-5 py-2.5 rounded-xl text-sm font-medium flex items-center transition-all duration-300 shadow-lg transform ${
+                            isDoctorRole 
+                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50' 
+                                : 'bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white hover:from-[#232a7c] hover:to-[#0A0F56] hover:shadow-xl hover:-translate-y-0.5'
+                        }`}
+                        disabled={isCreating || isDoctorRole}
+                        title={isDoctorRole ? 'Doctors cannot add patients' : 'Add a new patient'}
                     >
                         <FaPlus className="mr-2 text-base" />
                         Add Patient
@@ -117,9 +127,14 @@ const PatientList = () => {
                          <div className="mt-6">
                             <button
                                 type="button"
-                                onClick={() => setIsAddModalOpen(true)}
-                                className="bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white px-5 py-2.5 rounded-xl text-sm font-medium flex items-center mx-auto hover:from-[#232a7c] hover:to-[#0A0F56] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                disabled={isCreating}
+                                onClick={() => !isDoctorRole && setIsAddModalOpen(true)}
+                                className={`px-5 py-2.5 rounded-xl text-sm font-medium flex items-center transition-all duration-300 shadow-lg transform ${
+                                    isDoctorRole 
+                                        ? 'bg-gray-400 text-gray-600 cursor-not-allowed opacity-50' 
+                                        : 'bg-gradient-to-r from-[#0A0F56] to-[#232a7c] text-white hover:from-[#232a7c] hover:to-[#0A0F56] hover:shadow-xl hover:-translate-y-0.5'
+                                }`}
+                                disabled={isCreating || isDoctorRole}
+                                title={isDoctorRole ? 'Doctors cannot add patients' : 'Add a new patient'}
                             >
                                 <FaPlus className="mr-2 text-base" />
                                 Add Patient

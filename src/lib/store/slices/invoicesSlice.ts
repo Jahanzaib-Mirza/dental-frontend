@@ -24,7 +24,7 @@ export const fetchInvoices = createAsyncThunk(
       const response = await invoiceService.getInvoices();
       return response.data || response; // Handle different response structures
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch invoices');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch invoices');
     }
   }
 );
@@ -36,7 +36,7 @@ export const markInvoiceAsPaid = createAsyncThunk(
       const response = await invoiceService.markAsPaid(invoiceId);
       return { invoiceId, data: response.data || response };
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to mark invoice as paid');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to mark invoice as paid');
     }
   }
 );

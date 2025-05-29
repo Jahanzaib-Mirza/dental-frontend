@@ -9,11 +9,14 @@ interface DoctorCardProps {
   doctor: User;
   onEdit: (id: string, doctorData: any, onSuccess: () => void) => void;
   isUpdating?: boolean;
+  userRole?: string;
 }
 
-export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
+export function DoctorCard({ doctor, onEdit, isUpdating, userRole }: DoctorCardProps) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  const isReceptionist = userRole === 'receptionist';
 
   const handleEdit = (id: string, doctorData: any) => {
     onEdit(id, doctorData, () => setIsEditModalOpen(false));
@@ -61,8 +64,14 @@ export function DoctorCard({ doctor, onEdit, isUpdating }: DoctorCardProps) {
                 View Appointments
               </button>
               <button 
-                onClick={() => setIsEditModalOpen(true)}
-                className="border border-[#0A0F56] text-[#0A0F56] px-4 py-1 rounded text-sm font-medium hover:bg-indigo-50 transition"
+                onClick={() => !isReceptionist && setIsEditModalOpen(true)}
+                disabled={isReceptionist}
+                className={`border px-4 py-1 rounded text-sm font-medium transition ${
+                  isReceptionist 
+                    ? 'border-gray-300 text-gray-400 cursor-not-allowed opacity-50' 
+                    : 'border-[#0A0F56] text-[#0A0F56] hover:bg-indigo-50'
+                }`}
+                title={isReceptionist ? 'Receptionists cannot edit doctors' : 'Edit doctor details'}
               >
                 Edit Doctor
               </button>

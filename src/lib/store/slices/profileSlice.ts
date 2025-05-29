@@ -44,7 +44,7 @@ export const updateProfile = createAsyncThunk(
       const response = await userService.updateUser(userId, updateData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error?.message || 'Failed to update profile');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to update profile');
     }
   }
 );
@@ -56,7 +56,7 @@ export const changePassword = createAsyncThunk(
       const response = await userService.changePassword(passwordData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error?.message || 'Failed to change password');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to change password');
     }
   }
 );

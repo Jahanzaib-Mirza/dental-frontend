@@ -20,25 +20,37 @@ const initialState: PatientsState = {
 
 export const fetchPatients = createAsyncThunk(
   'patients/fetchPatients',
-  async () => {
-    const response = await patientService.getPatients();
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await patientService.getPatients();
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch patients');
+    }
   }
 );
 
 export const createPatient = createAsyncThunk(
   'patients/createPatient',
-  async (patientData: CreatePatientData) => {
-    const response = await patientService.createPatient(patientData);
-    return response.data;
+  async (patientData: CreatePatientData, { rejectWithValue }) => {
+    try {
+      const response = await patientService.createPatient(patientData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to create patient');
+    }
   }
 );
 
 export const updatePatient = createAsyncThunk(
   'patients/updatePatient',
-  async ({ id, patientData }: { id: string; patientData: Partial<CreatePatientData> }) => {
-    const response = await patientService.updatePatient(id, patientData);
-    return response.data;
+  async ({ id, patientData }: { id: string; patientData: Partial<CreatePatientData> }, { rejectWithValue }) => {
+    try {
+      const response = await patientService.updatePatient(id, patientData);
+      return response.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to update patient');
+    }
   }
 );
 
@@ -59,7 +71,7 @@ const patientsSlice = createSlice({
       })
       .addCase(fetchPatients.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.error.message || 'Failed to fetch patients';
+        state.error = action.payload as string;
       })
       // Create Patient
       .addCase(createPatient.pending, (state) => {
@@ -72,7 +84,7 @@ const patientsSlice = createSlice({
       })
       .addCase(createPatient.rejected, (state, action) => {
         state.isCreating = false;
-        state.error = action.error.message || 'Failed to create patient';
+        state.error = action.payload as string;
       })
       // Update Patient
       .addCase(updatePatient.pending, (state) => {
@@ -88,7 +100,7 @@ const patientsSlice = createSlice({
       })
       .addCase(updatePatient.rejected, (state, action) => {
         state.isUpdating = false;
-        state.error = action.error.message || 'Failed to update patient';
+        state.error = action.payload as string;
       });
   },
 });

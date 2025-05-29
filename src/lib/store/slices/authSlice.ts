@@ -26,7 +26,7 @@ export const login = createAsyncThunk(
       console.log(response);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Login failed');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Login failed');
     }
   }
 );
@@ -38,7 +38,7 @@ export const getProfile = createAsyncThunk(
       const response = await authService.getProfile();
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to get profile');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to get profile');
     }
   }
 );

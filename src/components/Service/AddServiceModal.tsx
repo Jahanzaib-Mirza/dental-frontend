@@ -26,22 +26,24 @@ export function AddServiceModal({ isOpen, onClose, onSubmit, isSubmitting, mode,
   });
 
   useEffect(() => {
-    if (mode === 'update' && service) {
-      setFormData({
-        name: service.name,
-        price: service.price.toString(),
-        description: service.description,
-        features: service.features.length > 0 ? service.features : [''],
-      });
-    } else {
-      setFormData({
-        name: '',
-        price: '',
-        description: '',
-        features: [''],
-      });
+    if (isOpen) {
+      if (mode === 'update' && service) {
+        setFormData({
+          name: service.name,
+          price: service.price.toString(),
+          description: service.description,
+          features: service.features.length > 0 ? service.features : [''],
+        });
+      } else {
+        setFormData({
+          name: '',
+          price: '',
+          description: '',
+          features: [''],
+        });
+      }
     }
-  }, [mode, service]);
+  }, [mode, service, isOpen]);
 
   const handleFeatureChange = (idx: number, value: string) => {
     const updated = [...formData.features];
@@ -92,7 +94,7 @@ export function AddServiceModal({ isOpen, onClose, onSubmit, isSubmitting, mode,
           <div>
             <label className="block text-sm mb-2">Price</label>
             <input
-              type="text"
+              type="number"
               required
               disabled={isSubmitting}
               className="w-full border border-gray-200 rounded-lg p-3 text-sm disabled:opacity-50 disabled:cursor-not-allowed"

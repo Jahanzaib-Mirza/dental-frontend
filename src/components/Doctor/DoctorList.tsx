@@ -9,6 +9,7 @@ import { toast } from 'react-hot-toast';
 export function DoctorList() {
   const dispatch = useAppDispatch();
   const { doctors, isLoading, error, isUpdating } = useAppSelector((state: RootState) => state.doctors);
+  const user = useAppSelector((state: RootState) => state.auth.user);
 
   useEffect(() => {
     dispatch(fetchDoctors());
@@ -56,6 +57,7 @@ export function DoctorList() {
           doctor={doctor}
           onEdit={handleEditDoctor}
           isUpdating={isUpdating}
+          userRole={user?.role}
         />
       ))}
     </div>

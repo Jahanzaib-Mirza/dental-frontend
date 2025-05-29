@@ -30,7 +30,7 @@ export const fetchDoctors = createAsyncThunk(
       const response = await userService.getDoctors();
       return response.data || []; // assuming response has data property containing doctor array
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch doctors');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch doctors');
     }
   }
 );
@@ -46,7 +46,7 @@ export const createDoctor = createAsyncThunk(
       return response.data;
     } catch (error: any) {
       console.log(error.response.data.error.message);
-      return rejectWithValue(error.response?.data?.error?.message);
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to create doctor');
     }
   }
 );
@@ -55,13 +55,10 @@ export const updateDoctor = createAsyncThunk(
   'doctors/updateDoctor',
   async ({ id, doctorData }: { id: string; doctorData: Partial<DoctorFormData> }, { rejectWithValue }) => {
     try {
-      const response = await userService.updateUser(id, {
-        ...doctorData,
-        role: 'doctor',
-      });
+      const response = await userService.updateUser(id, doctorData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error?.message || 'Failed to update doctor');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to update doctor');
     }
   }
 );

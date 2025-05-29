@@ -58,7 +58,7 @@ export const fetchExpenses = createAsyncThunk(
     try {
       return await expenseService.getExpenses(filters);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch expenses');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to fetch expenses');
     }
   }
 );
@@ -69,7 +69,7 @@ export const fetchExpense = createAsyncThunk(
     try {
       return await expenseService.getExpense(id);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch expense');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to fetch expense');
     }
   }
 );
@@ -80,7 +80,7 @@ export const createExpense = createAsyncThunk(
     try {
       return await expenseService.createExpense(expenseData);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to create expense');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to create expense');
     }
   }
 );
@@ -91,7 +91,7 @@ export const updateExpense = createAsyncThunk(
     try {
       return await expenseService.updateExpense(id, expenseData);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to update expense');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to update expense');
     }
   }
 );
@@ -103,7 +103,7 @@ export const deleteExpense = createAsyncThunk(
       await expenseService.deleteExpense(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to delete expense');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to delete expense');
     }
   }
 );
@@ -114,7 +114,7 @@ export const fetchExpenseSummary = createAsyncThunk(
     try {
       return await expenseService.getExpenseSummary(startDate, endDate);
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.error || 'Failed to fetch expense summary');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || error.response?.data?.error || 'Failed to fetch expense summary');
     }
   }
 );

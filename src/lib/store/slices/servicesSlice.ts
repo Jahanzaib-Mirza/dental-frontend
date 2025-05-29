@@ -33,7 +33,7 @@ export const fetchServices = createAsyncThunk(
       console.log(response.data);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch services');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to fetch services');
     }
   }
 );
@@ -45,7 +45,7 @@ export const createService = createAsyncThunk(
       const response = await serviceService.createService(serviceData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to create service');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to create service');
     }
   }
 );
@@ -57,7 +57,7 @@ export const updateService = createAsyncThunk(
       const response = await serviceService.updateService(id, serviceData);
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to update service');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to update service');
     }
   }
 );
@@ -69,7 +69,7 @@ export const deleteService = createAsyncThunk(
       await serviceService.deleteService(id);
       return id;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to delete service');
+      return rejectWithValue(error.response?.data?.error?.message || error.response?.data?.message || 'Failed to delete service');
     }
   }
 );
