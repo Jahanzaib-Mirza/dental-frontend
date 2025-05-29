@@ -26,12 +26,12 @@ export function Topbar() {
     <div className="flex items-center space-x-4">
       
       {/* Chat & Notification Icons */}
-      <button className="bg-[#1E2358] p-2 rounded-md">
+      {/* <button className="bg-[#1E2358] p-2 rounded-md">
         💬
       </button>
       <button className="bg-[#1E2358] p-2 rounded-md">
         🔔
-      </button>
+      </button> */}
 
       {/* Divider */}
       <div className="h-6 w-[1px] bg-gray-500"></div>
