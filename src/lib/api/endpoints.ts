@@ -56,4 +56,9 @@ export const API_ENDPOINTS = {
     BY_ID: (id: string) => `${BASE_URL}/api/expenses/${id}`,
     SUMMARY: `${BASE_URL}/api/expenses/summary`,
   },
+
+  // Dashboard endpoints
+  DASHBOARD: {
+    BASE: `${BASE_URL}/api/dashboard`,
+  },
 } as const; 
