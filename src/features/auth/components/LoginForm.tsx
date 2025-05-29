@@ -7,7 +7,7 @@ import type { RootState } from '../../../lib/store/store';
 export function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  // const [rememberMe, setRememberMe] = useState(false);
   
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -105,9 +105,9 @@ export function LoginForm() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <a href="#" className="text-sm font-medium text-[#0A0F56] hover:text-blue-700">
+                {/* <a href="#" className="text-sm font-medium text-[#0A0F56] hover:text-blue-700">
                   Forgot password?
-                </a>
+                </a> */}
               </div>
               <input
                 id="password"
@@ -120,7 +120,7 @@ export function LoginForm() {
               />
             </div>
             
-            <div className="flex items-center">
+            {/* <div className="flex items-center">
               <input
                 id="remember-me"
                 type="checkbox"
@@ -131,7 +131,7 @@ export function LoginForm() {
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                 Remember me
               </label>
-            </div>
+            </div> */}
             
             <button
               type="submit"

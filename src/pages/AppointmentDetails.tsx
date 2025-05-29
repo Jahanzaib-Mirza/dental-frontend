@@ -96,7 +96,7 @@ const AppointmentDetails = () => {
 
   // Populate form with existing treatment data
   useEffect(() => {
-    if (currentTreatment) {
+    if (currentTreatment && appointment && currentTreatment.appointment === appointment.id) {
       setDiagnosis(currentTreatment.diagnosis);
       setReviewNotes(currentTreatment.notes);
       setMedicines(currentTreatment.prescribedMedications);
@@ -124,8 +124,20 @@ const AppointmentDetails = () => {
         }));
         setAttachedReports(reportsFromTreatment);
       }
+    } else if (currentTreatment && appointment && currentTreatment.appointment !== appointment.id) {
+      // If currentTreatment is for a different appointment, clear the form
+      // This handles the case where old treatment data might arrive late
+      setDiagnosis('');
+      setReviewNotes('');
+      setSelectedServices([]);
+      setMedicines([]);
+      setIsFollowUpEnabled(false);
+      setFollowUpDate('');
+      setFollowUpTime('');
+      setFollowUpAvailableSlots([]);
+      setAttachedReports([]);
     }
-  }, [currentTreatment]);
+  }, [currentTreatment, appointment]);
 
   // Handle errors
   useEffect(() => {
