@@ -1,32 +1,17 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { 
-  FiCalendar, 
-  FiClock, 
-  FiUser, 
+import {    
   FiFileText, 
   FiDollarSign, 
   FiEye, 
   FiCpu, 
   FiActivity,
-  FiArrowLeft,
   FiPrinter,
-  FiDownload,
-  FiEdit3,
-  FiMapPin,
-  FiPhone,
-  FiMail,
-  FiCheckCircle,
-  FiAlertCircle,
-  FiInfo,
-  FiLoader,
   FiChevronDown,
   FiChevronUp,
-  FiTrash2
+  FiLoader,
 } from 'react-icons/fi';
-import { useAppDispatch, useAppSelector } from '../lib/hooks';
-import { fetchTreatment, clearTreatmentErrors } from '../lib/store/slices/treatmentsSlice';
-import type { RootState } from '../lib/store/store';
+import { treatmentService } from '../lib/api/services/treatments';
 import { toast } from 'react-hot-toast';
 import { calculateAge } from '../lib/utils/dateUtils';
 import InitialAvatar from '../components/Common/InitialAvatar';
@@ -118,23 +103,21 @@ interface PopulatedTreatment {
 const TreatmentDetails = () => {
   const { treatmentId } = useParams<{ treatmentId: string }>();
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   
-  const { currentTreatment, isLoading, error } = useAppSelector((state: RootState) => state.treatments);
+  const [currentTreatment, setCurrentTreatment] = useState<PopulatedTreatment | null>(null);
   const [expandedReports, setExpandedReports] = useState<Set<number>>(new Set());
   
   useEffect(() => {
     if (treatmentId) {
-      dispatch(fetchTreatment(treatmentId));
+      treatmentService.getTreatment(treatmentId)
+        .then(response => {
+          setCurrentTreatment(response as any as PopulatedTreatment);
+        })
+        .catch(error => {
+          toast.error(error.response?.data?.message || 'Failed to fetch treatment details');
+        });
     }
-  }, [dispatch, treatmentId]);
-
-  useEffect(() => {
-    if (error) {
-      toast.error(error);
-      dispatch(clearTreatmentErrors());
-    }
-  }, [error, dispatch]);
+  }, [treatmentId]);
 
   const handlePreviewReportImage = (imageUrl: string) => {
     if (imageUrl) {
@@ -160,7 +143,7 @@ const TreatmentDetails = () => {
     });
   };
 
-  if (isLoading) {
+  if (!currentTreatment) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] flex items-center justify-center">
         <div className="text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -170,27 +153,6 @@ const TreatmentDetails = () => {
       </div>
     );
   }
-
-  if (!currentTreatment) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] flex items-center justify-center">
-        <div className="text-center bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-          <FiFileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-700 mb-2">Treatment Not Found</h2>
-          <p className="text-gray-500 mb-6">The treatment you're looking for doesn't exist or has been removed.</p>
-          <button
-            onClick={() => navigate(-1)}
-            className="bg-[#0A0F56] text-white px-6 py-3 rounded-lg hover:bg-[#232a7c] transition-colors font-semibold"
-          >
-            Go Back
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Type assertion for populated treatment data
-  const treatment = currentTreatment as any as PopulatedTreatment;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#f4f6fb] to-[#e9eaf7] p-6">
@@ -220,7 +182,7 @@ const TreatmentDetails = () => {
                 <div className="relative flex-shrink-0">
                   <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/30">
                     <InitialAvatar 
-                      initials={getInitials(treatment.patient.name)} 
+                      initials={getInitials(currentTreatment.patient.name)} 
                       size={12}
                       bgColor="bg-white"
                       textColor="text-[#0A0F56]"
@@ -232,14 +194,14 @@ const TreatmentDetails = () => {
                   </div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h1 className="text-xl font-bold text-white truncate" title={treatment.patient.name}>
-                    {treatment.patient.name}
+                  <h1 className="text-xl font-bold text-white truncate" title={currentTreatment.patient.name}>
+                    {currentTreatment.patient.name}
                   </h1>
                   <p className="text-blue-100 text-sm truncate">
-                    {calculateAge(treatment.patient.dob)} years, {treatment.patient.gender}
+                    {calculateAge(currentTreatment.patient.dob)} years, {currentTreatment.patient.gender}
                   </p>
-                  <p className="text-blue-200 text-xs truncate" title={treatment.patient.email}>
-                    {treatment.patient.email}
+                  <p className="text-blue-200 text-xs truncate" title={currentTreatment.patient.email}>
+                    {currentTreatment.patient.email}
                   </p>
                 </div>
               </div>
@@ -247,15 +209,15 @@ const TreatmentDetails = () => {
               {/* Appointment Info */}
               <div className="text-center lg:text-left">
                 <p className="text-blue-100 text-sm font-medium">Appointment</p>
-                <p className="text-white font-bold">{new Date(treatment.appointment.date).toLocaleDateString()}</p>
-                <p className="text-blue-200 text-sm">Dr. {treatment.doctor.name}</p>
+                <p className="text-white font-bold">{new Date(currentTreatment.appointment.date).toLocaleDateString()}</p>
+                <p className="text-blue-200 text-sm">Dr. {currentTreatment.doctor.name}</p>
               </div>
 
               {/* Quick Stats */}
               <div className="text-center lg:text-left">
                 <p className="text-blue-100 text-sm font-medium">Treatment Cost</p>
-                <p className="text-white font-bold text-2xl">${treatment.servicesUsed.reduce((total, service) => total + service.price, 0).toFixed(0)}</p>
-                <p className="text-blue-200 text-sm">{treatment.servicesUsed.length} services provided</p>
+                <p className="text-white font-bold text-2xl">${currentTreatment.servicesUsed.reduce((total, service) => total + service.price, 0).toFixed(0)}</p>
+                <p className="text-blue-200 text-sm">{currentTreatment.servicesUsed.length} services provided</p>
               </div>
 
               {/* Actions */}
@@ -284,7 +246,7 @@ const TreatmentDetails = () => {
                 <h3 className="text-xl font-bold text-[#0A0F56]">Primary Diagnosis</h3>
               </div>
               <div className="bg-red-50 rounded-xl p-4 border border-red-100">
-                <p className="text-red-800 font-bold text-lg leading-relaxed">{treatment.diagnosis}</p>
+                <p className="text-red-800 font-bold text-lg leading-relaxed">{currentTreatment.diagnosis}</p>
               </div>
             </div>
 
@@ -297,7 +259,7 @@ const TreatmentDetails = () => {
                 <h3 className="text-xl font-bold text-[#0A0F56]">Services Provided</h3>
               </div>
               <div className="space-y-3">
-                {treatment.servicesUsed.map((service, index) => (
+                {currentTreatment.servicesUsed.map((service, index) => (
                   <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg border border-gray-100">
                     <span className="font-medium text-gray-800">{service.name}</span>
                     <span className="font-bold text-green-600">${service.price.toFixed(2)}</span>
@@ -307,7 +269,7 @@ const TreatmentDetails = () => {
                   <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg border border-green-100">
                     <span className="font-bold text-gray-800">Total Cost</span>
                     <span className="font-bold text-green-600 text-xl">
-                      ${treatment.servicesUsed.reduce((total, service) => total + service.price, 0).toFixed(2)}
+                      ${currentTreatment.servicesUsed.reduce((total, service) => total + service.price, 0).toFixed(2)}
                     </span>
                   </div>
                 </div>
@@ -315,7 +277,7 @@ const TreatmentDetails = () => {
             </div>
 
             {/* Medications */}
-            {treatment.prescribedMedications.length > 0 && (
+            {currentTreatment.prescribedMedications.length > 0 && (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center">
@@ -324,7 +286,7 @@ const TreatmentDetails = () => {
                   <h3 className="text-xl font-bold text-[#0A0F56]">Prescribed Medications</h3>
                 </div>
                 <div className="space-y-3">
-                  {treatment.prescribedMedications.map((medication, index) => (
+                  {currentTreatment.prescribedMedications.map((medication, index) => (
                     <div key={index} className="bg-blue-50 rounded-lg p-4 border border-blue-100">
                       <h4 className="font-bold text-blue-800 mb-2">{medication.name}</h4>
                       <div className="grid grid-cols-3 gap-2 text-sm">
@@ -350,7 +312,7 @@ const TreatmentDetails = () => {
 
           {/* Right Column - Medical Reports (Main Focus) */}
           <div className="xl:col-span-2">
-            {treatment.reports.length > 0 ? (
+            {currentTreatment.reports.length > 0 ? (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center">
@@ -358,12 +320,12 @@ const TreatmentDetails = () => {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-[#0A0F56]">Medical Reports</h2>
-                    <p className="text-gray-500 text-sm">{treatment.reports.length} report{treatment.reports.length > 1 ? 's' : ''} available</p>
+                    <p className="text-gray-500 text-sm">{currentTreatment.reports.length} report{currentTreatment.reports.length > 1 ? 's' : ''} available</p>
                   </div>
                 </div>
                 
                 <div className="space-y-4">
-                  {treatment.reports.map((report, index) => {
+                  {currentTreatment.reports.map((report, index) => {
                     const isExpanded = expandedReports.has(index);
                     return (
                       <div key={index} className="border border-gray-200 rounded-xl bg-gray-50 overflow-hidden">
@@ -475,7 +437,7 @@ const TreatmentDetails = () => {
             )}
 
             {/* Treatment Notes */}
-            {treatment.notes && (
+            {currentTreatment.notes && (
               <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 mt-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-gray-600 rounded-lg flex items-center justify-center">
@@ -484,7 +446,7 @@ const TreatmentDetails = () => {
                   <h3 className="text-xl font-bold text-[#0A0F56]">Treatment Notes</h3>
                 </div>
                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-100">
-                  <p className="text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">{treatment.notes}</p>
+                  <p className="text-gray-700 font-medium whitespace-pre-wrap leading-relaxed">{currentTreatment.notes}</p>
                 </div>
               </div>
             )}
@@ -496,29 +458,29 @@ const TreatmentDetails = () => {
 };
 
 // Enhanced info card component
-const InfoCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
-  <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-sm transition-shadow">
-    <div className="flex items-start gap-3">
-      <div className="flex-shrink-0 mt-0.5">{icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</p>
-        <p className="text-sm font-semibold text-gray-900 break-words leading-relaxed">{value}</p>
-      </div>
-    </div>
-  </div>
-);
+// const InfoCard = ({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) => (
+//   <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-sm transition-shadow">
+//     <div className="flex items-start gap-3">
+//       <div className="flex-shrink-0 mt-0.5">{icon}</div>
+//       <div className="flex-1 min-w-0">
+//         <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</p>
+//         <p className="text-sm font-semibold text-gray-900 break-words leading-relaxed">{value}</p>
+//       </div>
+//     </div>
+//   </div>
+// );
 
-// Statistics card component
-const StatCard = ({ label, value, color }: { label: string; value: string; color: string }) => (
-  <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
-    <div className="text-center">
-      <div className={`w-8 h-8 ${color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
-        <span className="text-white text-sm font-bold">{value.charAt(0)}</span>
-      </div>
-      <p className="text-base font-bold text-gray-900 break-words leading-tight">{value}</p>
-      <p className="text-xs text-gray-500 font-medium mt-1">{label}</p>
-    </div>
-  </div>
-);
+// // Statistics card component
+// const StatCard = ({ label, value, color }: { label: string; value: string; color: string }) => (
+//   <div className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm">
+//     <div className="text-center">
+//       <div className={`w-8 h-8 ${color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+//         <span className="text-white text-sm font-bold">{value.charAt(0)}</span>
+//       </div>
+//       <p className="text-base font-bold text-gray-900 break-words leading-tight">{value}</p>
+//       <p className="text-xs text-gray-500 font-medium mt-1">{label}</p>
+//     </div>
+//   </div>
+// );
 
 export default TreatmentDetails; 
