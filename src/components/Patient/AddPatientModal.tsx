@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import type { CreatePatientData } from '../../lib/api/services/patients';
-import { useAppDispatch } from '../../lib/hooks';
-import { createPatient } from '../../lib/store/slices/patientsSlice';
-import { toast } from 'react-hot-toast';
 
 interface AddPatientModalProps {
   isOpen: boolean;
@@ -16,7 +13,6 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<CreatePatientData>({
     name: '',
@@ -28,6 +24,24 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
     medicalHistory: '',
     allergies: ''
   });
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      gender: 'male',
+      dob: '',
+      address: '',
+      medicalHistory: '',
+      allergies: ''
+    });
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -42,10 +56,11 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
     setIsLoading(true);
     
     try {
-      const result = await dispatch(createPatient(formData)).unwrap();
-      onSubmit(result);
+      await onSubmit(formData);
+      resetForm();
     } catch (error: any) {
-      toast.error(error || 'Failed to create patient');
+      // Error handling is now done in the parent component
+      console.error('Error in modal:', error);
     } finally {
       setIsLoading(false);
     }
@@ -59,7 +74,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
         <div className="flex justify-between items-center mb-2">
           <h2 className="text-2xl font-bold text-gray-900">Add Patient</h2>
           <button 
-            onClick={onClose} 
+            onClick={handleClose} 
             className="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 py-1 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A0F56]"
             aria-label="Close modal"
           >
@@ -183,7 +198,7 @@ export const AddPatientModal: React.FC<AddPatientModalProps> = ({
           <div className="flex justify-end space-x-3 pt-2">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleClose}
               className="px-5 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-100 transition"
               disabled={isLoading}
             >

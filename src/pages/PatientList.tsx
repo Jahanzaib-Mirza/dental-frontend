@@ -31,6 +31,7 @@ const PatientList = () => {
             setIsAddModalOpen(false);
         } catch (err) {
             toast.error('Failed to add patient');
+            throw err; // Re-throw to let modal handle loading state
         }
     };
 
